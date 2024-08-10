@@ -3,9 +3,9 @@ import { DatabaseProvider, RedisProvider } from "../providers";
 import { and, eq, gte, lte, type InferInsertModel } from "drizzle-orm";
 import type { Repository } from "../interfaces/repository.interface";
 import { takeFirst, takeFirstOrThrow } from "../infrastructure/database/utils";
-import { emailVerificationsTable, usersTable } from "$lib/tables";
-import { passwordResetTable } from "$lib/tables/password-reset.table";
-import { oAuthTable } from "$lib/tables/oauth.table";
+import { emailVerificationsTable, usersTable } from "./../../../tables";
+import { passwordResetTable } from "./../../../tables/password-reset.table";
+import { oAuthTable } from "./../../../tables/oauth.table";
 import type { UserInfo } from "../interfaces/oauth.intefrace";
 
 export type CreateOAuthUser = Pick<

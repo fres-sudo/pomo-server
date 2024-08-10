@@ -4,8 +4,8 @@ import { MailerService } from "./mailer.service";
 import { TokensService } from "./tokens.service";
 import { LuciaProvider } from "../providers/lucia.provider";
 import { UsersRepository } from "../repositories/users.repository";
-import type { CreateUserDto } from "$lib/dtos/user.dto";
-import type { LoginDto } from "$lib/dtos/login.dto";
+import type { CreateUserDto } from "./../../../dtos/user.dto";
+import type { LoginDto } from "./../../../dtos/login.dto";
 import { HashingService } from "./hashing.service";
 import { config } from "../common/config";
 import { EmailVerificationsService } from "./email-verifications.service";
@@ -85,7 +85,7 @@ export class AuthService {
       this.mailerService.sendEmailVerificationToken({
         to: data.email,
         props: {
-          link: `${config.ORIGIN}/verify/${newUser.id}/${token}`,
+          link: `${Bun.env.ORIGIN}/verify/${newUser.id}/${token}`,
         },
       });
 

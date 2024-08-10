@@ -3,8 +3,8 @@ import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
 import { eq, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
-import { usersTable } from "./../../../tables";
-import type { User } from "./../../../dtos/user.dto";
+import { tasksTable } from "./../../../tables";
+import { CreateTaskDto, Task } from "../../../dtos/task.dto";
 
 /* -------------------------------------------------------------------------- */
 /*                                 Repository                                 */
@@ -22,53 +22,46 @@ storing data. They should not contain any business logic, only database queries.
  In our case the method 'trxHost' is used to set the transaction context.
 */
 
-export type CreateUser = InferInsertModel<typeof usersTable>;
-export type UpdateUser = Partial<CreateUser>;
+export type UpdateTaskDto = Partial<CreateTaskDto>;
 
 @injectable()
-export class UsersRepository implements Repository {
+export class TaskRepository implements Repository {
   constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
 
-  async findAll(): Promise<User[]> {
-    return this.db.query.usersTable.findMany();
+  async findAll(): Promise<Task[]> {
+    return this.db.query.tasksTable.findMany();
   }
 
   async findOneById(id: string) {
-    return this.db.query.usersTable.findFirst({
-      where: eq(usersTable.id, id),
+    return this.db.query.tasksTable.findFirst({
+      where: eq(tasksTable.id, id),
     });
   }
 
   async findOneByIdOrThrow(id: string) {
-    const user = await this.findOneById(id);
-    if (!user) throw Error("user-not-found");
-    return user;
+    const task = await this.findOneById(id);
+    if (!task) throw Error("task-not-found");
+    return task;
   }
 
-  async findOneByEmail(email: string) {
-    return this.db.query.usersTable.findFirst({
-      where: eq(usersTable.email, email),
-    });
-  }
-
-  async create(data: CreateUser) {
+  async create(data: CreateTaskDto) {
     return this.db
-      .insert(usersTable)
+      .insert(tasksTable)
       .values(data)
       .returning()
       .then(takeFirstOrThrow);
   }
 
-  async update(id: string, data: UpdateUser) {
+  async update(id: string, data: UpdateTaskDto) {
     return this.db
-      .update(usersTable)
+      .update(tasksTable)
       .set(data)
-      .where(eq(usersTable.id, id))
+      .where(eq(tasksTable.id, id))
       .returning()
       .then(takeFirstOrThrow);
   }
 
   trxHost(trx: DatabaseProvider) {
-    return new UsersRepository(trx);
+    return new TaskRepository(trx);
   }
 }

@@ -3,8 +3,8 @@ import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
 import { eq, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
-import { usersTable } from "./../../../tables";
-import type { User } from "./../../../dtos/user.dto";
+import { projectsTable } from "./../../../tables";
+import { CreateProjectDto, Project } from "../../../dtos/project.dto";
 
 /* -------------------------------------------------------------------------- */
 /*                                 Repository                                 */
@@ -22,53 +22,53 @@ storing data. They should not contain any business logic, only database queries.
  In our case the method 'trxHost' is used to set the transaction context.
 */
 
-export type CreateUser = InferInsertModel<typeof usersTable>;
-export type UpdateUser = Partial<CreateUser>;
+export type UpdateProjectDto = Partial<CreateProjectDto>;
 
 @injectable()
-export class UsersRepository implements Repository {
+export class ProjectRepository implements Repository {
   constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
 
-  async findAll(): Promise<User[]> {
-    return this.db.query.usersTable.findMany();
+  async findAll(): Promise<Project[]> {
+    return this.db.query.projectsTable.findMany();
   }
 
   async findOneById(id: string) {
-    return this.db.query.usersTable.findFirst({
-      where: eq(usersTable.id, id),
+    return this.db.query.projectsTable.findFirst({
+      where: eq(projectsTable.id, id),
     });
+  }
+
+  async findAllByUser(id: string): Promise<Project[]> {
+    return this.db
+      .select()
+      .from(projectsTable)
+      .where(eq(projectsTable.userId, id));
   }
 
   async findOneByIdOrThrow(id: string) {
-    const user = await this.findOneById(id);
-    if (!user) throw Error("user-not-found");
-    return user;
+    const task = await this.findOneById(id);
+    if (!task) throw Error("project-not-found");
+    return task;
   }
 
-  async findOneByEmail(email: string) {
-    return this.db.query.usersTable.findFirst({
-      where: eq(usersTable.email, email),
-    });
-  }
-
-  async create(data: CreateUser) {
+  async create(data: CreateProjectDto) {
     return this.db
-      .insert(usersTable)
+      .insert(projectsTable)
       .values(data)
       .returning()
       .then(takeFirstOrThrow);
   }
 
-  async update(id: string, data: UpdateUser) {
+  async update(id: string, data: UpdateProjectDto) {
     return this.db
-      .update(usersTable)
+      .update(projectsTable)
       .set(data)
-      .where(eq(usersTable.id, id))
+      .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);
   }
 
   trxHost(trx: DatabaseProvider) {
-    return new UsersRepository(trx);
+    return new ProjectRepository(trx);
   }
 }

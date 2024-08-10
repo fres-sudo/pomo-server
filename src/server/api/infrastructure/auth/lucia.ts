@@ -3,7 +3,7 @@ import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { Discord, Google } from "arctic";
 import { db } from "../database";
 import { config } from "../../common/config";
-import { sessionsTable, usersTable } from "$lib/tables";
+import { sessionsTable, usersTable } from "./../../../../tables";
 
 const adapter = new DrizzlePostgreSQLAdapter(db, sessionsTable, usersTable);
 

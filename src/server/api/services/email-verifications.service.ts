@@ -5,7 +5,7 @@ import { MailerService } from "./mailer.service";
 import { TokensService } from "./tokens.service";
 import { UsersRepository } from "../repositories/users.repository";
 import { EmailVerificationsRepository } from "../repositories/email-verifications.repository";
-import log from "$lib/utils/logger";
+import log from "./../../../utils/logger";
 
 @injectable()
 export class EmailVerificationsService {

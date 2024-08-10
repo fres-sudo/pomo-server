@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { usersTable } from "$lib/tables";
+import { usersTable } from "./../tables";
 
 /*
 export const userDto = z.object({
@@ -41,7 +41,6 @@ export const createUserDto = createInsertSchema(usersTable)
     id: true,
     createdAt: true,
     updatedAt: true,
-    address: true,
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: "passwords-donot-match",

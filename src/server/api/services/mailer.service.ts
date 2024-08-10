@@ -116,7 +116,7 @@ export class MailerService {
   }
 
   private getTemplate(template: string) {
-    const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+    const __filename = Bun.fileURLToPath(import.meta.url); // get the resolved path to the file
     const __dirname = path.dirname(__filename); // get the name of the directory
     return fs.readFileSync(
       path.join(__dirname, `../infrastructure/email-templates/${template}.hbs`),

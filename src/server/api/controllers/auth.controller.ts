@@ -9,20 +9,20 @@ import { requireAuth } from "../middleware/auth.middleware";
 import { limiter } from "../middleware/rate-limiter.middlware";
 import type { Controller } from "../interfaces/controller.interface";
 import { EmailVerificationsService } from "../services/email-verifications.service";
-import { createUserDto } from "$lib/dtos/user.dto";
+import { createUserDto } from "./../../../dtos/user.dto";
 import { AuthService } from "../services/auth.service";
-import { loginDto } from "$lib/dtos/login.dto";
+import { loginDto } from "./../../../dtos/login.dto";
 import { PasswordResetRepository } from "../repositories/password-reset.repository";
 import { PasswordResetService } from "../services/password-reset.service";
 import {
   passwordResetDto,
   passwordResetEmailDto,
-} from "$lib/dtos/password-reset.dto";
+} from "./../../../dtos/password-reset.dto";
 import { OAuthService } from "../services/oauth.service";
 import type { GoogleAuthInfo } from "../interfaces/oauth.intefrace";
 import { serializeCookie } from "oslo/cookie";
 import { config } from "../common/config";
-import log from "$lib/utils/logger";
+import log from "./../../../utils/logger";
 
 /* -------------------------------------------------------------------------- */
 /*                                 Controller                                 */

@@ -7,11 +7,11 @@ import { PasswordResetRepository } from "../repositories/password-reset.reposito
 import { BadRequest, InternalError } from "../common/errors";
 import { HTTPException } from "hono/http-exception";
 import { config } from "../common/config";
-import log from "$lib/utils/logger";
+import log from "./../../../utils/logger";
 import type {
   ResetPasswordDto,
   ResetPasswordEmailDto,
-} from "$lib/dtos/password-reset.dto";
+} from "./../../../dtos/password-reset.dto";
 import { isWithinExpirationDate } from "oslo";
 import { HashingService } from "./hashing.service";
 
@@ -85,7 +85,7 @@ export class PasswordResetService {
       this.mailerService.sendPasswordResetEmail({
         to: user.email,
         props: {
-          link: `${config.ORIGIN}/resetpassword/${token}`,
+          link: `${Bun.env.ORIGIN}/resetpassword/${token}`,
         },
       });
 

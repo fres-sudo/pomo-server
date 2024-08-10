@@ -3,8 +3,8 @@ import { DatabaseProvider, RedisProvider } from "../providers";
 import { and, eq, gte, lte, type InferInsertModel } from "drizzle-orm";
 import type { Repository } from "../interfaces/repository.interface";
 import { takeFirst, takeFirstOrThrow } from "../infrastructure/database/utils";
-import { emailVerificationsTable } from "$lib/tables";
-import { passwordResetTable } from "$lib/tables/password-reset.table";
+import { emailVerificationsTable } from "./../../../tables";
+import { passwordResetTable } from "./../../../tables/passwords-reset.table";
 
 export type CreatePasswordReset = Pick<
   InferInsertModel<typeof passwordResetTable>,

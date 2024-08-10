@@ -35,7 +35,7 @@ export class OAuthService {
     this.google = new Google(
       process.env.GOOGLE_CLIENT_ID ?? "",
       process.env.GOOGLE_CLIENT_SECRET ?? "",
-      `${config.ORIGIN}/api/auth/login/google/callback`,
+      `${Bun.env.ORIGIN}/api/auth/login/google/callback`,
     );
   }
 
