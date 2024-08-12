@@ -8,5 +8,7 @@ export const createTaskDto = createInsertSchema(tasksTable).omit({
   createdAt: true,
 });
 
+export const updateTaskDto = createTaskDto.partial();
+
 export type Task = z.infer<typeof taskDto>;
 export type CreateTaskDto = z.infer<typeof createTaskDto>;

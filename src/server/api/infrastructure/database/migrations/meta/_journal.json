@@ -1,1 +1,27 @@
-{"version":"6","dialect":"postgresql","entries":[]}
+{
+  "version": "6",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1723393920389,
+      "tag": "0000_regular_lady_vermin",
+      "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1723393939124,
+      "tag": "0001_yummy_venus",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1723395010252,
+      "tag": "0002_gorgeous_scarlet_spider",
+      "breakpoints": false
+    }
+  ]
+}

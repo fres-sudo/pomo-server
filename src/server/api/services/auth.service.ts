@@ -41,7 +41,10 @@ export class AuthService {
         throw BadRequest("wrong-password");
       }
       const session = await this.lucia.createSession(user.id, {});
-      return this.lucia.createSessionCookie(session.id);
+      return {
+        sessionCookie: this.lucia.createSessionCookie(session.id),
+        user,
+      };
     } catch (e) {
       if (e instanceof HTTPException) {
         throw e;

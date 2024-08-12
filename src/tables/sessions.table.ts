@@ -4,7 +4,7 @@ import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const sessionsTable = pgTable("sessions", {
-  id: cuid2("id").primaryKey(),
+  id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id),

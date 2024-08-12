@@ -11,6 +11,10 @@ import {
   verifyOrigin,
 } from "./server/api/middleware/auth.middleware";
 import "reflect-metadata";
+import { TaskController } from "./server/api/controllers/task.controller";
+import { ProjectController } from "./server/api/controllers/project.controller";
+import { db } from "./server/api/infrastructure/database";
+import { usersTable } from "./tables";
 
 /* -------------------------------------------------------------------------- */
 /*                               Client Request                               */
@@ -37,24 +41,36 @@ const app = new Hono().basePath("/api");
 /* --------------------------- Global Middlewares --------------------------- */
 
 app.use("*", cors({ origin: "*" })); // Allow CORS for all origins
-app.use(verifyOrigin).use(validateAuthSession);
+//app./*use(verifyOrigin).*/ use(validateAuthSession);
 
 /* --------------------------------- Routes --------------------------------- */
 const authRoutes = container.resolve(AuthController).routes();
 const userRoutes = container.resolve(UserController).routes();
+const taskRoutes = container.resolve(TaskController).routes();
+const projectRoutes = container.resolve(ProjectController).routes();
 
-app.route("/auth", authRoutes).route("/users", userRoutes);
+app
+  .route("/auth", authRoutes)
+  .route("/users", userRoutes)
+  .route("/tasks", taskRoutes)
+  .route("/projects", projectRoutes);
 
-app.get("/", (c) => {
-  return c.text("--------- app is fine, now worries 🐳 ------------");
+app.get("/", async (c) => {
+  log.info("app logged 💥");
+  const users = await db.select().from(usersTable);
+  return c.json(users);
+  //return c.text("--------- app is fine, no worries 🐳 --------- ");
 });
 
 Bun.serve({
   fetch: app.fetch,
-  port: 3000,
+  port: 9000,
 });
 
-/* -------------------------------------------------------------------------- */
+log.info("Bun is running 🐳");
+
+/* -------------------------------------------------------------------------- *
+
 /*                                   Exports                                  */
 /* -------------------------------------------------------------------------- */
 export { app };

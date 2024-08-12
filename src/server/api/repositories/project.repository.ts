@@ -6,22 +6,6 @@ import { takeFirstOrThrow } from "../infrastructure/database/utils";
 import { projectsTable } from "./../../../tables";
 import { CreateProjectDto, Project } from "../../../dtos/project.dto";
 
-/* -------------------------------------------------------------------------- */
-/*                                 Repository                                 */
-/* -------------------------------------------------------------------------- */
-/* ---------------------------------- About --------------------------------- */
-/*
-Repositories are the layer that interacts with the database. They are responsible for retrieving and
-storing data. They should not contain any business logic, only database queries.
-*/
-/* ---------------------------------- Notes --------------------------------- */
-/*
- Repositories should only contain methods for CRUD operations and any other database interactions.
- Any complex logic should be delegated to a service. If a repository method requires a transaction,
- it should be passed in as an argument or the class should have a method to set the transaction.
- In our case the method 'trxHost' is used to set the transaction context.
-*/
-
 export type UpdateProjectDto = Partial<CreateProjectDto>;
 
 @injectable()
@@ -63,6 +47,14 @@ export class ProjectRepository implements Repository {
     return this.db
       .update(projectsTable)
       .set(data)
+      .where(eq(projectsTable.id, id))
+      .returning()
+      .then(takeFirstOrThrow);
+  }
+
+  async delete(id: string) {
+    return this.db
+      .delete(projectsTable)
       .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);

@@ -1,6 +1,7 @@
 import { text, primaryKey, pgTable } from "drizzle-orm/pg-core";
 import { usersTable } from "./users.table";
 import { relations } from "drizzle-orm";
+import { timestamps } from "./utils";
 
 export const oAuthTable = pgTable(
   "oAuths",

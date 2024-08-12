@@ -1,2 +1,0 @@
-ALTER TABLE "users" ALTER COLUMN "birthdate" SET NOT NULL;
-ALTER TABLE "users" ALTER COLUMN "address" SET NOT NULL;

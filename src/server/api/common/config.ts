@@ -1,4 +1,4 @@
 export const config = {
-  ...Bun.env,
+  ...process.env,
   isProduction: process.env.NODE_ENV === "production",
 };

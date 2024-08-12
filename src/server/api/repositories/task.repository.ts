@@ -6,22 +6,6 @@ import { takeFirstOrThrow } from "../infrastructure/database/utils";
 import { tasksTable } from "./../../../tables";
 import { CreateTaskDto, Task } from "../../../dtos/task.dto";
 
-/* -------------------------------------------------------------------------- */
-/*                                 Repository                                 */
-/* -------------------------------------------------------------------------- */
-/* ---------------------------------- About --------------------------------- */
-/*
-Repositories are the layer that interacts with the database. They are responsible for retrieving and
-storing data. They should not contain any business logic, only database queries.
-*/
-/* ---------------------------------- Notes --------------------------------- */
-/*
- Repositories should only contain methods for CRUD operations and any other database interactions.
- Any complex logic should be delegated to a service. If a repository method requires a transaction,
- it should be passed in as an argument or the class should have a method to set the transaction.
- In our case the method 'trxHost' is used to set the transaction context.
-*/
-
 export type UpdateTaskDto = Partial<CreateTaskDto>;
 
 @injectable()
@@ -30,6 +14,20 @@ export class TaskRepository implements Repository {
 
   async findAll(): Promise<Task[]> {
     return this.db.query.tasksTable.findMany();
+  }
+
+  async findAllByUser(userId: string): Promise<Task[]> {
+    return this.db
+      .select()
+      .from(tasksTable)
+      .where(eq(tasksTable.userId, userId));
+  }
+
+  async findAllByProject(projectId: string): Promise<Task[]> {
+    return this.db
+      .select()
+      .from(tasksTable)
+      .where(eq(tasksTable.projectId, projectId));
   }
 
   async findOneById(id: string) {
@@ -56,6 +54,14 @@ export class TaskRepository implements Repository {
     return this.db
       .update(tasksTable)
       .set(data)
+      .where(eq(tasksTable.id, id))
+      .returning()
+      .then(takeFirstOrThrow);
+  }
+
+  async delete(id: string) {
+    return this.db
+      .delete(tasksTable)
       .where(eq(tasksTable.id, id))
       .returning()
       .then(takeFirstOrThrow);
