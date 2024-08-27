@@ -23,6 +23,7 @@ import type { GoogleAuthInfo } from "../interfaces/oauth.intefrace";
 import { serializeCookie } from "oslo/cookie";
 import { config } from "../common/config";
 import log from "./../../../utils/logger";
+import { validator } from "hono/validator"
 
 @injectable()
 export class AuthController implements Controller {
@@ -38,7 +39,7 @@ export class AuthController implements Controller {
     @inject(PasswordResetService)
     private readonly passwordResetTokenService: PasswordResetService,
     @inject(OAuthService) private readonly oAuthService: OAuthService,
-  ) {}
+  ) { }
 
   routes() {
     return this.controller
@@ -51,11 +52,9 @@ export class AuthController implements Controller {
         zValidator("json", loginDto),
         //limiter({ limit: 10, minutes: 60 }),
         async (context) => {
-          const { email, password } = context.req.valid("json");
-          const { sessionCookie, user } = await this.authService.login({
-            email,
-            password,
-          });
+          const body = context.req.valid("json");
+          log.info("BODY:", body);
+          const { sessionCookie, user } = await this.authService.login(body);
           setCookie(
             context,
             sessionCookie.name,

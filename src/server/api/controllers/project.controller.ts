@@ -18,7 +18,7 @@ export class ProjectController implements Controller {
 
   constructor(
     @inject(ProjectService) private readonly projectService: ProjectService,
-  ) {}
+  ) { }
 
   routes() {
     return this.controller
@@ -39,19 +39,19 @@ export class ProjectController implements Controller {
         return context.json(newProject);
       })
       .patch(
-        "/:taskId",
+        "/:projectId",
         zValidator("json", updateProjectDto),
         async (context) => {
-          const { taskId } = context.req.param();
+          const { projectId } = context.req.param();
           const data = context.req.valid("json");
           const updatedProject: Project =
-            await this.projectService.updateProject(taskId, data);
+            await this.projectService.updateProject(projectId, data);
           return context.json(updatedProject);
         },
       )
-      .delete("/:taskId", async (context) => {
-        const { taskId } = context.req.param();
-        const deletedProject = await this.projectService.deleteProject(taskId);
+      .delete("/:projectId", async (context) => {
+        const { projectId } = context.req.param();
+        const deletedProject = await this.projectService.deleteProject(projectId);
         return context.json(deletedProject);
       });
   }

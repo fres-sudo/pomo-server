@@ -5,8 +5,12 @@ import { z } from "zod";
 export const projectDto = createSelectSchema(projectsTable);
 export const createProjectDto = createInsertSchema(projectsTable).omit({
   id: true,
+  endDate: true,
   createdAt: true,
+}).extend({
+  endDate: z.coerce.date(),
 });
+
 export const updateProjectDto = createProjectDto.partial();
 
 export type Project = z.infer<typeof projectDto>;

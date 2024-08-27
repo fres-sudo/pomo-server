@@ -10,10 +10,15 @@ export type UpdateProjectDto = Partial<CreateProjectDto>;
 
 @injectable()
 export class ProjectRepository implements Repository {
-  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
+  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) { }
 
   async findAll(): Promise<Project[]> {
-    return this.db.query.projectsTable.findMany();
+    return this.db.query.projectsTable.findMany({
+      with: {
+        tasks: true,
+        users: true
+      }
+    });
   }
 
   async findOneById(id: string) {

@@ -41,7 +41,8 @@ const app = new Hono().basePath("/api");
 /* --------------------------- Global Middlewares --------------------------- */
 
 app.use("*", cors({ origin: "*" })); // Allow CORS for all origins
-//app./*use(verifyOrigin).*/ use(validateAuthSession);
+app.use(validateAuthSession);
+
 
 /* --------------------------------- Routes --------------------------------- */
 const authRoutes = container.resolve(AuthController).routes();
@@ -70,7 +71,6 @@ Bun.serve({
 log.info("Bun is running 🐳");
 
 /* -------------------------------------------------------------------------- *
-
 /*                                   Exports                                  */
 /* -------------------------------------------------------------------------- */
 export { app };

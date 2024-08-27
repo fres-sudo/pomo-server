@@ -11,6 +11,7 @@
     "test": "npm run test:integration && npm run test:unit",
     "initialize": "bun install && docker-compose up --no-recreate -d && bun db:migrate",
     "docker": "docker-compose up -d",
+    "docker:build": "docker-compose up -d --build",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write ."
   },
