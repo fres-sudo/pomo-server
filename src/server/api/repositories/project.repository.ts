@@ -3,7 +3,7 @@ import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
 import { eq, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
-import { projectsTable } from "./../../../tables";
+import { projectsTable, tasksTable, usersTable } from "./../../../tables";
 import { CreateProjectDto, Project } from "../../../dtos/project.dto";
 
 export type UpdateProjectDto = Partial<CreateProjectDto>;
@@ -16,7 +16,7 @@ export class ProjectRepository implements Repository {
     return this.db.query.projectsTable.findMany({
       with: {
         tasks: true,
-        users: true
+        owner: true
       }
     });
   }
@@ -27,17 +27,20 @@ export class ProjectRepository implements Repository {
     });
   }
 
-  async findAllByUser(id: string): Promise<Project[]> {
-    return this.db
-      .select()
-      .from(projectsTable)
-      .where(eq(projectsTable.userId, id));
+  async findAllByUser(userId: string): Promise<Project[]> {
+    return this.db.query.projectsTable.findMany({
+      where: eq(projectsTable.userId, userId),
+      with: {
+        tasks: true,
+        owner: true,
+      }
+    })
   }
 
   async findOneByIdOrThrow(id: string) {
-    const task = await this.findOneById(id);
-    if (!task) throw Error("project-not-found");
-    return task;
+    const project = await this.findOneById(id);
+    if (!project) throw Error("project-not-found");
+    return project;
   }
 
   async create(data: CreateProjectDto) {

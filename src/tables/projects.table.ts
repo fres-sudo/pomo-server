@@ -25,7 +25,7 @@ export const projectsTable = pgTable("projects", {
 export const projectsRelationships = relations(
   projectsTable,
   ({ many, one }) => ({
-    users: one(usersTable, {
+    owner: one(usersTable, {
       fields: [projectsTable.userId],
       references: [usersTable.id],
     }),

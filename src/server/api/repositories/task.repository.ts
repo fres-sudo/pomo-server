@@ -10,17 +10,19 @@ export type UpdateTaskDto = Partial<CreateTaskDto>;
 
 @injectable()
 export class TaskRepository implements Repository {
-  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
+  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) { }
 
   async findAll(): Promise<Task[]> {
     return this.db.query.tasksTable.findMany();
   }
 
   async findAllByUser(userId: string): Promise<Task[]> {
-    return this.db
-      .select()
-      .from(tasksTable)
-      .where(eq(tasksTable.userId, userId));
+    return this.db.query.tasksTable.findMany({
+      where: eq(tasksTable.userId, userId),
+      with: {
+        user: true
+      }
+    })
   }
 
   async findAllByProject(projectId: string): Promise<Task[]> {
