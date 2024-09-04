@@ -3,10 +3,17 @@ import { tasksTable } from "../tables";
 import { z } from "zod";
 
 export const taskDto = createSelectSchema(tasksTable);
-export const createTaskDto = createInsertSchema(tasksTable).omit({
-  id: true,
-  createdAt: true,
-});
+export const createTaskDto = createInsertSchema(tasksTable)
+	.omit({
+		id: true,
+		dueDate: true,
+		createdAt: true,
+		completedAt: true,
+	})
+	.extend({
+		dueDate: z.coerce.date(),
+		completedAt: z.coerce.date().optional(),
+	});
 
 export const updateTaskDto = createTaskDto.partial();
 

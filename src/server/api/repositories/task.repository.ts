@@ -19,9 +19,6 @@ export class TaskRepository implements Repository {
   async findAllByUser(userId: string): Promise<Task[]> {
     return this.db.query.tasksTable.findMany({
       where: eq(tasksTable.userId, userId),
-      with: {
-        user: true
-      }
     })
   }
 

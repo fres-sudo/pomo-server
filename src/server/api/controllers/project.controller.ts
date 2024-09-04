@@ -11,6 +11,7 @@ import {
   createProjectDto,
 } from "../../../dtos/project.dto";
 import { zValidator } from "@hono/zod-validator";
+import { requireAuth } from "../middleware/auth.middleware";
 
 @injectable()
 export class ProjectController implements Controller {
@@ -26,12 +27,14 @@ export class ProjectController implements Controller {
         const projects: Project[] = await this.projectService.getAllProjects();
         return context.json(projects);
       })
-      .get("/:userId", async (context) => {
-        const { userId } = context.req.param();
-        const projects: Project[] =
-          await this.projectService.getProjectsByUser(userId);
-        return context.json(projects);
-      })
+      .get("/:userId",
+        requireAuth,
+        async (context) => {
+          const { userId } = context.req.param();
+          const projects: Project[] =
+            await this.projectService.getProjectsByUser(userId);
+          return context.json(projects);
+        })
       .post("/", zValidator("json", createProjectDto), async (context) => {
         const data = context.req.valid("json");
         const newProject: Project =

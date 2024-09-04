@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
-import { eq, type InferInsertModel } from "drizzle-orm";
+import { eq, and, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
 import { projectsTable, tasksTable, usersTable } from "./../../../tables";
 import { CreateProjectDto, Project } from "../../../dtos/project.dto";
@@ -16,7 +16,6 @@ export class ProjectRepository implements Repository {
     return this.db.query.projectsTable.findMany({
       with: {
         tasks: true,
-        owner: true
       }
     });
   }
@@ -32,7 +31,6 @@ export class ProjectRepository implements Repository {
       where: eq(projectsTable.userId, userId),
       with: {
         tasks: true,
-        owner: true,
       }
     })
   }

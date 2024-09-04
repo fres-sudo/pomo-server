@@ -4,24 +4,24 @@ import { relations } from "drizzle-orm";
 import { timestamps } from "./utils";
 
 export const oAuthTable = pgTable(
-  "oAuths",
-  {
-    providerId: text("providerId").notNull(),
-    providerUserId: text("providerUserId").notNull(),
-    userId: text("userId")
-      .notNull()
-      .references(() => usersTable.id),
-  },
-  (table) => {
-    return {
-      pk: primaryKey({ columns: [table.providerId, table.providerUserId] }),
-    };
-  },
+	"oAuths",
+	{
+		providerId: text("providerId").notNull(),
+		providerUserId: text("providerUserId").notNull(),
+		userId: text("userId")
+			.notNull()
+			.references(() => usersTable.id),
+	},
+	(table) => {
+		return {
+			pk: primaryKey({ columns: [table.providerId, table.providerUserId] }),
+		};
+	}
 );
 
 export const oAuthRelationships = relations(oAuthTable, ({ many, one }) => ({
-  users: one(usersTable, {
-    fields: [oAuthTable.userId],
-    references: [usersTable.id],
-  }),
+	user: one(usersTable, {
+		fields: [oAuthTable.userId],
+		references: [usersTable.id],
+	}),
 }));

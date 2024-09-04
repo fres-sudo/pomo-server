@@ -12,7 +12,7 @@ import { zValidator } from "@hono/zod-validator";
 export class TaskController implements Controller {
   controller = new Hono<HonoTypes>();
 
-  constructor(@inject(TaskService) private readonly taskService: TaskService) {}
+  constructor(@inject(TaskService) private readonly taskService: TaskService) { }
 
   routes() {
     return this.controller
@@ -20,12 +20,12 @@ export class TaskController implements Controller {
         const tasks: Task[] = await this.taskService.getAllTasks();
         return context.json(tasks);
       })
-      .get("/:projectId", async (context) => {
+      .get("/project/:projectId", async (context) => {
         const { projectId } = context.req.param();
         const tasks: Task[] = await this.taskService.getAllByProject(projectId);
         return context.json(tasks);
       })
-      .get("/:userId", async (context) => {
+      .get("/user/:userId", async (context) => {
         const { userId } = context.req.param();
         const tasks: Task[] = await this.taskService.getTasksByUser(userId);
         return context.json(tasks);
