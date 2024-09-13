@@ -7,7 +7,8 @@ import type { Controller } from "../interfaces/controller.interface";
 import { TaskService } from "../services/task.service";
 import { Task, updateTaskDto, createTaskDto } from "../../../dtos/task.dto";
 import { zValidator } from "@hono/zod-validator";
-
+import { z } from "zod";
+import { log } from "console";
 @injectable()
 export class TaskController implements Controller {
   controller = new Hono<HonoTypes>();
@@ -28,6 +29,17 @@ export class TaskController implements Controller {
       .get("/user/:userId", async (context) => {
         const { userId } = context.req.param();
         const tasks: Task[] = await this.taskService.getTasksByUser(userId);
+        return context.json(tasks);
+      })
+      .get("/user", async (context) => {
+        const userId = context.req.query("userId");
+        const dateString = context.req.query("date");
+        const type = context.req.query("type");
+
+        console.log("TYPE", type);
+
+        const date = dateString ? new Date(dateString) : new Date(); // Default to today if date is not provided
+        const tasks: Task[] = type == "day" ? await this.taskService.getTasksOfTheDay(date, userId ?? "") : await this.taskService.getTasksOfTheMonth(date, userId ?? "");
         return context.json(tasks);
       })
       .post("/", zValidator("json", createTaskDto), async (context) => {

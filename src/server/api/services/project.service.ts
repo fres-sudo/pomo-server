@@ -10,11 +10,13 @@ import {
 import { CreateProjectDto } from "../../../dtos/project.dto";
 import { BadRequest } from "../common/errors";
 import log from "../../../utils/logger";
+import { StorageService } from "./storage.service";
 
 @injectable()
 export class ProjectService {
   constructor(
     @inject(LuciaProvider) private readonly lucia: LuciaProvider,
+    @inject(StorageService) private readonly storageService: StorageService,
     @inject(ProjectRepository)
     private readonly projectRepository: ProjectRepository,
   ) {}
@@ -36,11 +38,17 @@ export class ProjectService {
     return this.projectRepository.create(data);
   }
 
+  async uploadProjectImage(projectId: string, image: File) {
+    const { name } = await this.storageService.upload(image);
+    return this.projectRepository.update(projectId, { imageCover: name });
+  }
+
   async updateProject(id: string, data: UpdateProjectDto) {
     return this.projectRepository.update(id, data);
   }
 
   async deleteProject(id: string) {
+    await this.taskRepository.delete();
     return this.projectRepository.delete(id);
   }
 }

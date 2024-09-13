@@ -9,7 +9,7 @@ export class TaskService {
     @inject(LuciaProvider) private readonly lucia: LuciaProvider,
     @inject(TaskRepository)
     private readonly taskRepository: TaskRepository,
-  ) {}
+  ) { }
 
   async getAllTasks() {
     return this.taskRepository.findAll();
@@ -17,6 +17,14 @@ export class TaskService {
 
   async getTasksByUser(id: string) {
     return this.taskRepository.findAllByUser(id);
+  }
+
+  async getTasksOfTheMonth(date: Date, userId: string) {
+    return this.taskRepository.findAllByMonth(date, userId)
+  }
+
+  async getTasksOfTheDay(date: Date, userId: string) {
+    return this.taskRepository.findAllByDay(date, userId)
   }
 
   async getAllByProject(projectId: string) {

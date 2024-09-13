@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
-import { eq, type InferInsertModel } from "drizzle-orm";
+import { eq, sql, and, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
 import { tasksTable } from "./../../../tables";
 import { CreateTaskDto, Task } from "../../../dtos/task.dto";
@@ -22,6 +22,31 @@ export class TaskRepository implements Repository {
     })
   }
 
+  async findAllByDay(date: Date, userId: string): Promise<Task[]> {
+    return this.db.query.tasksTable.findMany({
+      where: and(eq(tasksTable.userId, userId), this.isSameDay(tasksTable.dueDate, date)),
+    })
+  }
+
+  // Helper function to compare just the day part of dates
+  isSameDay(column: any, date: Date) {
+    // Depending on your SQL dialect, adjust the date function. Example for SQL:
+    return sql`DATE(${column}) = DATE(${date.toISOString().split('T')[0]})`; // Strips time part
+  }
+  // Helper function for comparing just the month and year in PostgreSQL
+  isSameMonth(column: any, date: Date) {
+    // Truncate both column and input date to the first day of the month
+    const truncatedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    return sql`DATE_TRUNC('month', ${column}) = DATE_TRUNC('month', ${truncatedDate}::date)`;
+  }  // The main function using the helper for the query
+  async findAllByMonth(date: Date, userId: string): Promise<Task[]> {
+    return this.db.query.tasksTable.findMany({
+      where: and(
+        eq(tasksTable.userId, userId),
+        this.isSameMonth(tasksTable.dueDate, date) // Use the helper function here
+      ),
+    });
+  }
   async findAllByProject(projectId: string): Promise<Task[]> {
     return this.db
       .select()

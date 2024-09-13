@@ -19,7 +19,7 @@ export class ProjectController implements Controller {
 
   constructor(
     @inject(ProjectService) private readonly projectService: ProjectService,
-  ) { }
+  ) {}
 
   routes() {
     return this.controller
@@ -27,19 +27,31 @@ export class ProjectController implements Controller {
         const projects: Project[] = await this.projectService.getAllProjects();
         return context.json(projects);
       })
-      .get("/:userId",
-        requireAuth,
-        async (context) => {
-          const { userId } = context.req.param();
-          const projects: Project[] =
-            await this.projectService.getProjectsByUser(userId);
-          return context.json(projects);
-        })
+      .get("/:userId", requireAuth, async (context) => {
+        const { userId } = context.req.param();
+        const projects: Project[] =
+          await this.projectService.getProjectsByUser(userId);
+        return context.json(projects);
+      })
+      .post("/upload", async (c) => {
+        const body = await c.req.parseBody();
+        console.log(body["file"]); // File | string
+      })
       .post("/", zValidator("json", createProjectDto), async (context) => {
         const data = context.req.valid("json");
         const newProject: Project =
           await this.projectService.createProject(data);
         return context.json(newProject);
+      })
+      .put("/image/:projectId", async (context) => {
+        const image = await context.req.parseBody();
+        const projecId = context.req.param("projectId");
+        console.log(image["image"]);
+        const updatedProject = this.projectService.uploadProjectImage(
+          projecId,
+          image["image"] as File,
+        );
+        return context.json(updatedProject);
       })
       .patch(
         "/:projectId",
@@ -54,7 +66,8 @@ export class ProjectController implements Controller {
       )
       .delete("/:projectId", async (context) => {
         const { projectId } = context.req.param();
-        const deletedProject = await this.projectService.deleteProject(projectId);
+        const deletedProject =
+          await this.projectService.deleteProject(projectId);
         return context.json(deletedProject);
       });
   }

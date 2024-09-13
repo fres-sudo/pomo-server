@@ -60,7 +60,7 @@ export class ProjectRepository implements Repository {
 
   async delete(id: string) {
     return this.db
-      .delete(projectsTable)
+      .delete(projectsTable).
       .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);

@@ -24,7 +24,7 @@ export class AuthService {
     private readonly emailVerificationToken: EmailVerificationsService,
     @inject(UsersRepository) private readonly usersRepository: UsersRepository,
     @inject(HashingService) private readonly hashingService: HashingService,
-  ) {}
+  ) { }
 
   async login(data: LoginDto) {
     try {
@@ -63,12 +63,17 @@ export class AuthService {
    */
   async signup(data: CreateUserDto) {
     try {
-      const existingUser = await this.usersRepository.findOneByEmail(
+      const existingEmail = await this.usersRepository.findOneByEmail(
         data.email,
       );
-      if (existingUser) {
-        throw BadRequest("user-already-existing");
+      const existingUsername = await this.usersRepository.findOneByUsername(data.username);
+      if (existingEmail) {
+        throw BadRequest("email-already-in-use");
       }
+      if (existingUsername) {
+        throw BadRequest("username-already-in-use")
+      }
+
       const hashedPassword = await this.hashingService.hash(data.password);
 
       data.password = hashedPassword;
