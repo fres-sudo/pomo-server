@@ -15,25 +15,9 @@ import { TaskController } from "./server/api/controllers/task.controller";
 import { ProjectController } from "./server/api/controllers/project.controller";
 import { db } from "./server/api/infrastructure/database";
 import { usersTable } from "./tables";
-
-/* -------------------------------------------------------------------------- */
-/*                               Client Request                               */
-/* ------------------------------------ ▲ ----------------------------------- */
-/* ------------------------------------ | ----------------------------------- */
-/* ------------------------------------ ▼ ----------------------------------- */
-/*                                 Controller                                 */
-/* ---------------------------- (Request Routing) --------------------------- */
-/* ------------------------------------ ▲ ----------------------------------- */
-/* ------------------------------------ | ----------------------------------- */
-/* ------------------------------------ ▼ ----------------------------------- */
-/*                                   Service                                  */
-/* ---------------------------- (Business logic) ---------------------------- */
-/* ------------------------------------ ▲ ----------------------------------- */
-/* ------------------------------------ | ----------------------------------- */
-/* ------------------------------------ ▼ ----------------------------------- */
-/*                                 Repository                                 */
-/* ----------------------------- (Data storage) ----------------------------- */
-/* -------------------------------------------------------------------------- */
+import { StatsController } from "./server/api/controllers/stats.controller";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 /* ----------------------------------- Api ---------------------------------- */
 const app = new Hono().basePath("/api");
@@ -48,12 +32,21 @@ const authRoutes = container.resolve(AuthController).routes();
 const userRoutes = container.resolve(UserController).routes();
 const taskRoutes = container.resolve(TaskController).routes();
 const projectRoutes = container.resolve(ProjectController).routes();
+const statsRoutes = container.resolve(StatsController).routes();
 
 app
   .route("/auth", authRoutes)
   .route("/users", userRoutes)
   .route("/tasks", taskRoutes)
-  .route("/projects", projectRoutes);
+  .route("/projects", projectRoutes)
+  .route("/stats", statsRoutes);
+
+// Serve the 404 page for any unmatched routes
+app.notFound((context) => {
+  const htmlPath = join(__dirname, "/ui/404.html");
+  const htmlContent = readFileSync(htmlPath, "utf-8");
+  return context.html(htmlContent);
+});
 
 app.get("/", async (c) => {
   log.info("app logged 💥");

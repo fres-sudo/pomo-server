@@ -4,7 +4,6 @@ import type { LoginDto } from "./../../../dtos/login.dto";
 import { DatabaseProvider } from "../providers";
 import { UsersRepository } from "../repositories/users.repository";
 
-
 @injectable()
 export class UserService {
   constructor(
@@ -12,6 +11,9 @@ export class UserService {
     @inject(UsersRepository) private readonly userRepository: UsersRepository,
   ) {}
 
+  async findUserByUsername(username: string) {
+    return this.userRepository.findOneByUsername(username);
+  }
   async getAllUsers() {
     return this.userRepository.findAll();
   }

@@ -11,6 +11,7 @@ import { config } from "../common/config";
 import { EmailVerificationsService } from "./email-verifications.service";
 import { HTTPException } from "hono/http-exception";
 import { EmailVerificationsRepository } from "../repositories/email-verifications.repository";
+import log from "../../../utils/logger";
 
 @injectable()
 export class AuthService {
@@ -24,13 +25,16 @@ export class AuthService {
     private readonly emailVerificationToken: EmailVerificationsService,
     @inject(UsersRepository) private readonly usersRepository: UsersRepository,
     @inject(HashingService) private readonly hashingService: HashingService,
-  ) { }
+  ) {}
 
   async login(data: LoginDto) {
     try {
       const user = await this.usersRepository.findOneByEmail(data.email);
       if (!user) {
         throw BadRequest("invalid-email");
+      }
+      if (!user.verified) {
+        throw BadRequest("email-not-verified");
       }
       const hashedPassword = await this.hashingService.verify(
         user.password,
@@ -46,6 +50,7 @@ export class AuthService {
         user,
       };
     } catch (e) {
+      log.error(e);
       if (e instanceof HTTPException) {
         throw e;
       }
@@ -66,12 +71,14 @@ export class AuthService {
       const existingEmail = await this.usersRepository.findOneByEmail(
         data.email,
       );
-      const existingUsername = await this.usersRepository.findOneByUsername(data.username);
+      const existingUsername = await this.usersRepository.findOneByUsername(
+        data.username,
+      );
       if (existingEmail) {
         throw BadRequest("email-already-in-use");
       }
       if (existingUsername) {
-        throw BadRequest("username-already-in-use")
+        throw BadRequest("username-already-in-use");
       }
 
       const hashedPassword = await this.hashingService.hash(data.password);
@@ -93,12 +100,13 @@ export class AuthService {
       this.mailerService.sendEmailVerificationToken({
         to: data.email,
         props: {
-          link: `${Bun.env.ORIGIN}/verify/${newUser.id}/${token}`,
+          link: `${config.api.origin}/api/auth/verify/${newUser.id}/${token}`,
         },
       });
 
       return newUser;
     } catch (e) {
+      log.error(e);
       if (e instanceof HTTPException) {
         throw e;
       }

@@ -48,7 +48,6 @@ export class ProjectService {
   }
 
   async deleteProject(id: string) {
-    await this.taskRepository.delete();
     return this.projectRepository.delete(id);
   }
 }

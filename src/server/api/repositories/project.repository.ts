@@ -10,13 +10,13 @@ export type UpdateProjectDto = Partial<CreateProjectDto>;
 
 @injectable()
 export class ProjectRepository implements Repository {
-  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) { }
+  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
 
   async findAll(): Promise<Project[]> {
     return this.db.query.projectsTable.findMany({
       with: {
         tasks: true,
-      }
+      },
     });
   }
 
@@ -31,8 +31,8 @@ export class ProjectRepository implements Repository {
       where: eq(projectsTable.userId, userId),
       with: {
         tasks: true,
-      }
-    })
+      },
+    });
   }
 
   async findOneByIdOrThrow(id: string) {
@@ -60,7 +60,7 @@ export class ProjectRepository implements Repository {
 
   async delete(id: string) {
     return this.db
-      .delete(projectsTable).
+      .delete(projectsTable)
       .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);

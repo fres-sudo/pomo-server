@@ -13,7 +13,7 @@ import { log } from "console";
 export class TaskController implements Controller {
   controller = new Hono<HonoTypes>();
 
-  constructor(@inject(TaskService) private readonly taskService: TaskService) { }
+  constructor(@inject(TaskService) private readonly taskService: TaskService) {}
 
   routes() {
     return this.controller
@@ -35,11 +35,11 @@ export class TaskController implements Controller {
         const userId = context.req.query("userId");
         const dateString = context.req.query("date");
         const type = context.req.query("type");
-
-        console.log("TYPE", type);
-
-        const date = dateString ? new Date(dateString) : new Date(); // Default to today if date is not provided
-        const tasks: Task[] = type == "day" ? await this.taskService.getTasksOfTheDay(date, userId ?? "") : await this.taskService.getTasksOfTheMonth(date, userId ?? "");
+        const date = dateString ? new Date(dateString) : new Date();
+        const tasks: Task[] =
+          type == "day"
+            ? await this.taskService.getTasksOfTheDay(date, userId ?? "")
+            : await this.taskService.getTasksOfTheMonth(date, userId ?? "");
         return context.json(tasks);
       })
       .post("/", zValidator("json", createTaskDto), async (context) => {
