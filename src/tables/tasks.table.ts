@@ -1,6 +1,12 @@
 import { cuid2 } from "./utils";
 import { usersTable } from "./users.table";
-import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { projectsTable } from "./projects.table";
@@ -15,19 +21,23 @@ export const tasksTable = pgTable("tasks", {
   pomodoroCompleted: integer("pomodoroCompleted"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   completedAt: timestamp("completedAt"),
-  projectId: text("projectId").references(() => projectsTable.id),
+  dueDate: timestamp("dueDate").notNull().defaultNow(),
+  highPriority: boolean("highPriority").notNull().default(false),
+  projectId: text("projectId").references(() => projectsTable.id, {
+    onDelete: "cascade",
+  }),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id),
 });
 
 export const taskRelationships = relations(tasksTable, ({ many, one }) => ({
-  users: one(usersTable, {
+  user: one(usersTable, {
     fields: [tasksTable.userId],
     references: [usersTable.id],
   }),
-  projects: one(projectsTable, {
-    fields: [tasksTable.userId],
+  project: one(projectsTable, {
+    fields: [tasksTable.projectId],
     references: [projectsTable.id],
   }),
 }));

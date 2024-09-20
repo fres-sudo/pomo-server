@@ -47,5 +47,11 @@ export const createUserDto = createInsertSchema(usersTable)
     path: ["passwordConfirmation"],
   });
 
+export const updateUserDto = userDto.partial().omit({
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type User = z.infer<typeof userDto>;
 export type CreateUserDto = z.infer<typeof createUserDto>;
+export type UpdateUserDto = z.infer<typeof updateUserDto>;

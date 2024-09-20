@@ -1,26 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
-import { eq, type InferInsertModel } from "drizzle-orm";
+import { eq, and, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
-import { projectsTable } from "./../../../tables";
+import { projectsTable, tasksTable, usersTable } from "./../../../tables";
 import { CreateProjectDto, Project } from "../../../dtos/project.dto";
-
-/* -------------------------------------------------------------------------- */
-/*                                 Repository                                 */
-/* -------------------------------------------------------------------------- */
-/* ---------------------------------- About --------------------------------- */
-/*
-Repositories are the layer that interacts with the database. They are responsible for retrieving and
-storing data. They should not contain any business logic, only database queries.
-*/
-/* ---------------------------------- Notes --------------------------------- */
-/*
- Repositories should only contain methods for CRUD operations and any other database interactions.
- Any complex logic should be delegated to a service. If a repository method requires a transaction,
- it should be passed in as an argument or the class should have a method to set the transaction.
- In our case the method 'trxHost' is used to set the transaction context.
-*/
 
 export type UpdateProjectDto = Partial<CreateProjectDto>;
 
@@ -29,7 +13,11 @@ export class ProjectRepository implements Repository {
   constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
 
   async findAll(): Promise<Project[]> {
-    return this.db.query.projectsTable.findMany();
+    return this.db.query.projectsTable.findMany({
+      with: {
+        tasks: true,
+      },
+    });
   }
 
   async findOneById(id: string) {
@@ -38,17 +26,19 @@ export class ProjectRepository implements Repository {
     });
   }
 
-  async findAllByUser(id: string): Promise<Project[]> {
-    return this.db
-      .select()
-      .from(projectsTable)
-      .where(eq(projectsTable.userId, id));
+  async findAllByUser(userId: string): Promise<Project[]> {
+    return this.db.query.projectsTable.findMany({
+      where: eq(projectsTable.userId, userId),
+      with: {
+        tasks: true,
+      },
+    });
   }
 
   async findOneByIdOrThrow(id: string) {
-    const task = await this.findOneById(id);
-    if (!task) throw Error("project-not-found");
-    return task;
+    const project = await this.findOneById(id);
+    if (!project) throw Error("project-not-found");
+    return project;
   }
 
   async create(data: CreateProjectDto) {
@@ -63,6 +53,14 @@ export class ProjectRepository implements Repository {
     return this.db
       .update(projectsTable)
       .set(data)
+      .where(eq(projectsTable.id, id))
+      .returning()
+      .then(takeFirstOrThrow);
+  }
+
+  async delete(id: string) {
+    return this.db
+      .delete(projectsTable)
       .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);

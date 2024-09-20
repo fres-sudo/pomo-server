@@ -20,7 +20,13 @@ export const contributorsTable = pgTable("contributors", {
 export const contributorsRelationships = relations(
   contributorsTable,
   ({ many, one }) => ({
-    users: many(usersTable),
-    projectsTable: many(projectsTable),
+    users: one(usersTable, {
+      fields: [contributorsTable.userId],
+      references: [usersTable.id],
+    }),
+    projects: one(projectsTable, {
+      fields: [contributorsTable.userId],
+      references: [projectsTable.id],
+    }),
   }),
 );

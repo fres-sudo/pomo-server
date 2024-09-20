@@ -11,25 +11,13 @@ import {
   verifyOrigin,
 } from "./server/api/middleware/auth.middleware";
 import "reflect-metadata";
-
-/* -------------------------------------------------------------------------- */
-/*                               Client Request                               */
-/* ------------------------------------ ▲ ----------------------------------- */
-/* ------------------------------------ | ----------------------------------- */
-/* ------------------------------------ ▼ ----------------------------------- */
-/*                                 Controller                                 */
-/* ---------------------------- (Request Routing) --------------------------- */
-/* ------------------------------------ ▲ ----------------------------------- */
-/* ------------------------------------ | ----------------------------------- */
-/* ------------------------------------ ▼ ----------------------------------- */
-/*                                   Service                                  */
-/* ---------------------------- (Business logic) ---------------------------- */
-/* ------------------------------------ ▲ ----------------------------------- */
-/* ------------------------------------ | ----------------------------------- */
-/* ------------------------------------ ▼ ----------------------------------- */
-/*                                 Repository                                 */
-/* ----------------------------- (Data storage) ----------------------------- */
-/* -------------------------------------------------------------------------- */
+import { TaskController } from "./server/api/controllers/task.controller";
+import { ProjectController } from "./server/api/controllers/project.controller";
+import { db } from "./server/api/infrastructure/database";
+import { usersTable } from "./tables";
+import { StatsController } from "./server/api/controllers/stats.controller";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 /* ----------------------------------- Api ---------------------------------- */
 const app = new Hono().basePath("/api");
@@ -37,24 +25,44 @@ const app = new Hono().basePath("/api");
 /* --------------------------- Global Middlewares --------------------------- */
 
 app.use("*", cors({ origin: "*" })); // Allow CORS for all origins
-app.use(verifyOrigin).use(validateAuthSession);
+app.use(validateAuthSession);
 
 /* --------------------------------- Routes --------------------------------- */
 const authRoutes = container.resolve(AuthController).routes();
 const userRoutes = container.resolve(UserController).routes();
+const taskRoutes = container.resolve(TaskController).routes();
+const projectRoutes = container.resolve(ProjectController).routes();
+const statsRoutes = container.resolve(StatsController).routes();
 
-app.route("/auth", authRoutes).route("/users", userRoutes);
+app
+  .route("/auth", authRoutes)
+  .route("/users", userRoutes)
+  .route("/tasks", taskRoutes)
+  .route("/projects", projectRoutes)
+  .route("/stats", statsRoutes);
 
-app.get("/", (c) => {
-  return c.text("--------- app is fine, now worries 🐳 ------------");
+// Serve the 404 page for any unmatched routes
+app.notFound((context) => {
+  const htmlPath = join(__dirname, "/ui/404.html");
+  const htmlContent = readFileSync(htmlPath, "utf-8");
+  return context.html(htmlContent);
+});
+
+app.get("/", async (c) => {
+  log.info("app logged 💥");
+  const users = await db.select().from(usersTable);
+  return c.json(users);
+  //return c.text("--------- app is fine, no worries 🐳 --------- ");
 });
 
 Bun.serve({
   fetch: app.fetch,
-  port: 3000,
+  port: 9000,
 });
 
-/* -------------------------------------------------------------------------- */
+log.info("Bun is running 🐳");
+
+/* -------------------------------------------------------------------------- *
 /*                                   Exports                                  */
 /* -------------------------------------------------------------------------- */
 export { app };

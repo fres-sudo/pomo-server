@@ -24,14 +24,8 @@ export const lucia = new Lucia(adapter, {
 
 interface DatabaseUserAttributes {
   id: string;
-  name: string;
-  surname: string;
-  address: string | null;
-  birthdate: string | null;
+  username: string;
   password: string | null;
-  phoneNumber: string | null;
-  gender: "MALE" | "FEMALE" | "NOT_DEFINED" | null;
-  role: "PATIENT" | "DOCTOR" | "RECEPTIONIST" | null;
   email: string;
   avatar: string | null;
   verified: boolean;

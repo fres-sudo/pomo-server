@@ -1,11 +1,11 @@
 {
-  "id": "3da00e9e-5cd0-43e5-972a-7b455913a38d",
-  "prevId": "9c0d8d2f-bfff-491c-ab24-73ef384cab56",
+  "id": "ca9d4013-a87f-4b53-a78a-b42de062a648",
+  "prevId": "d95e5549-ed23-47e9-9769-ef8452e3b792",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
-    "public.addresses": {
-      "name": "addresses",
+    "public.sessions": {
+      "name": "sessions",
       "schema": "",
       "columns": {
         "id": {
@@ -14,39 +14,27 @@
           "primaryKey": true,
           "notNull": true
         },
-        "street": {
-          "name": "street",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "houseNumber": {
-          "name": "houseNumber",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "cityId": {
-          "name": "cityId",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "zip": {
-          "name": "zip",
-          "type": "char(6)",
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "addresses_cityId_cities_id_fk": {
-          "name": "addresses_cityId_cities_id_fk",
-          "tableFrom": "addresses",
-          "tableTo": "cities",
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
           "columnsFrom": [
-            "cityId"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -58,8 +46,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.appointments": {
-      "name": "appointments",
+    "public.users": {
+      "name": "users",
       "schema": "",
       "columns": {
         "id": {
@@ -68,208 +56,71 @@
           "primaryKey": true,
           "notNull": true
         },
-        "patientId": {
-          "name": "patientId",
+        "username": {
+          "name": "username",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "doctorId": {
-          "name": "doctorId",
+        "avatar": {
+          "name": "avatar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "citext",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "verified": {
+          "name": "verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "password": {
+          "name": "password",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "date": {
-          "name": "date",
-          "type": "timestamp",
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "reason": {
-          "name": "reason",
-          "type": "varchar(100)",
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
-          "default": "'Generic Visit'"
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "appointments_patientId_patients_id_fk": {
-          "name": "appointments_patientId_patients_id_fk",
-          "tableFrom": "appointments",
-          "tableTo": "patients",
-          "columnsFrom": [
-            "patientId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "appointments_doctorId_doctors_id_fk": {
-          "name": "appointments_doctorId_doctors_id_fk",
-          "tableFrom": "appointments",
-          "tableTo": "doctors",
-          "columnsFrom": [
-            "doctorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.cities": {
-      "name": "cities",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "shortName": {
-          "name": "shortName",
-          "type": "char(2)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "countryId": {
-          "name": "countryId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "cities_countryId_countries_id_fk": {
-          "name": "cities_countryId_countries_id_fk",
-          "tableFrom": "cities",
-          "tableTo": "countries",
-          "columnsFrom": [
-            "countryId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.countries": {
-      "name": "countries",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "shortName": {
-          "name": "shortName",
-          "type": "varchar(5)",
-          "primaryKey": false,
-          "notNull": false
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.doctors": {
-      "name": "doctors",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
+      "uniqueConstraints": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
         },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "receptionistId": {
-          "name": "receptionistId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "specialization": {
-          "name": "specialization",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'Generic'"
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
         }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "doctors_userId_users_id_fk": {
-          "name": "doctors_userId_users_id_fk",
-          "tableFrom": "doctors",
-          "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "doctors_receptionistId_receptionists_id_fk": {
-          "name": "doctors_receptionistId_receptionists_id_fk",
-          "tableFrom": "doctors",
-          "tableTo": "receptionists",
-          "columnsFrom": [
-            "receptionistId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      }
     },
     "public.email_verifications": {
       "name": "email_verifications",
@@ -347,56 +198,8 @@
         }
       }
     },
-    "public.emergencyContatcts": {
-      "name": "emergencyContatcts",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "suername": {
-          "name": "suername",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "email": {
-          "name": "email",
-          "type": "citext",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "phoneNumber": {
-          "name": "phoneNumber",
-          "type": "varchar(15)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "relationship": {
-          "name": "relationship",
-          "type": "relationship",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'UNKNOWN'"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.login_requests": {
-      "name": "login_requests",
+    "public.passwordResetTable": {
+      "name": "passwordResetTable",
       "schema": "",
       "columns": {
         "id": {
@@ -411,8 +214,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "email": {
-          "name": "email",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -439,205 +242,98 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "passwordResetTable_user_id_users_id_fk": {
+          "name": "passwordResetTable_user_id_users_id_fk",
+          "tableFrom": "passwordResetTable",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "login_requests_email_unique": {
-          "name": "login_requests_email_unique",
+        "passwordResetTable_user_id_unique": {
+          "name": "passwordResetTable_user_id_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "email"
+            "user_id"
           ]
         }
       }
     },
-    "public.medicalHistories": {
-      "name": "medicalHistories",
+    "public.projects": {
+      "name": "projects",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
           "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "date": {
-          "name": "date",
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
-        "description": {
-          "name": "description",
-          "type": "varchar(255)",
+        "startDate": {
+          "name": "startDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "endDate": {
+          "name": "endDate",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": true
         },
-        "notes": {
-          "name": "notes",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "medicalHistories_id_patients_id_fk": {
-          "name": "medicalHistories_id_patients_id_fk",
-          "tableFrom": "medicalHistories",
-          "tableTo": "patients",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.patients": {
-      "name": "patients",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "doctorId": {
-          "name": "doctorId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "emergencyContact": {
-          "name": "emergencyContact",
+        "imageCover": {
+          "name": "imageCover",
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "patients_userId_users_id_fk": {
-          "name": "patients_userId_users_id_fk",
-          "tableFrom": "patients",
-          "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
         },
-        "patients_doctorId_users_id_fk": {
-          "name": "patients_doctorId_users_id_fk",
-          "tableFrom": "patients",
-          "tableTo": "users",
-          "columnsFrom": [
-            "doctorId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "patients_emergencyContact_emergencyContatcts_id_fk": {
-          "name": "patients_emergencyContact_emergencyContatcts_id_fk",
-          "tableFrom": "patients",
-          "tableTo": "emergencyContatcts",
-          "columnsFrom": [
-            "emergencyContact"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.receptionists": {
-      "name": "receptionists",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
+        "completedAt": {
+          "name": "completedAt",
+          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "receptionists_userId_users_id_fk": {
-          "name": "receptionists_userId_users_id_fk",
-          "tableFrom": "receptionists",
-          "tableTo": "users",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.sessions": {
-      "name": "sessions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
+          "notNull": false
         },
         "user_id": {
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "sessions_user_id_users_id_fk": {
-          "name": "sessions_user_id_users_id_fk",
-          "tableFrom": "sessions",
+        "projects_user_id_users_id_fk": {
+          "name": "projects_user_id_users_id_fk",
+          "tableFrom": "projects",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -652,8 +348,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.users": {
-      "name": "users",
+    "public.tasks": {
+      "name": "tasks",
       "schema": "",
       "columns": {
         "id": {
@@ -664,98 +360,83 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(100)",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "surname": {
-          "name": "surname",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "gender": {
-          "name": "gender",
-          "type": "gender",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'NOT_DEFINED'"
-        },
-        "role": {
-          "name": "role",
-          "type": "role",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'PATIENT'"
-        },
-        "birthdate": {
-          "name": "birthdate",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "address": {
-          "name": "address",
+        "description": {
+          "name": "description",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "phoneNumber": {
-          "name": "phoneNumber",
+        "pomodoro": {
+          "name": "pomodoro",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "pomodoroCompleted": {
+          "name": "pomodoroCompleted",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
         },
-        "avatar": {
-          "name": "avatar",
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completedAt": {
+          "name": "completedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dueDate": {
+          "name": "dueDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "projectId": {
+          "name": "projectId",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "email": {
-          "name": "email",
-          "type": "citext",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "verified": {
-          "name": "verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "password": {
-          "name": "password",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "users_address_addresses_id_fk": {
-          "name": "users_address_addresses_id_fk",
-          "tableFrom": "users",
-          "tableTo": "addresses",
+        "tasks_projectId_projects_id_fk": {
+          "name": "tasks_projectId_projects_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "projects",
           "columnsFrom": [
-            "address"
+            "projectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "tasks_user_id_users_id_fk": {
+          "name": "tasks_user_id_users_id_fk",
+          "tableFrom": "tasks",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -765,65 +446,65 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "users_email_unique": {
-          "name": "users_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+      "uniqueConstraints": {}
+    },
+    "public.contributors": {
+      "name": "contributors",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "projectId": {
+          "name": "projectId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         }
-      }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contributors_projectId_projects_id_fk": {
+          "name": "contributors_projectId_projects_id_fk",
+          "tableFrom": "contributors",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "projectId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "contributors_userId_users_id_fk": {
+          "name": "contributors_userId_users_id_fk",
+          "tableFrom": "contributors",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     }
   },
-  "enums": {
-    "public.relationship": {
-      "name": "relationship",
-      "schema": "public",
-      "values": [
-        "UNKNOWN",
-        "MOTHER",
-        "FATHER",
-        "SISTER",
-        "BROTHER",
-        "SON",
-        "DAUGHTER",
-        "GRANDMOTHER",
-        "GRANDFATHER",
-        "GRANDSON",
-        "GRANDDAUGHTER",
-        "AUNT",
-        "UNCLE",
-        "COUSIN",
-        "NIECE",
-        "NEPHEW",
-        "WIFE",
-        "HUSBAND",
-        "MOTHER-IN-LAW",
-        "FATHER-IN-LAW",
-        "SISTER-IN-LAW",
-        "BROTHER-IN-LAW"
-      ]
-    },
-    "public.gender": {
-      "name": "gender",
-      "schema": "public",
-      "values": [
-        "MALE",
-        "FEMALE",
-        "NOT_DEFINED"
-      ]
-    },
-    "public.role": {
-      "name": "role",
-      "schema": "public",
-      "values": [
-        "DOCTOR",
-        "RECEPTIONIST",
-        "PATIENT"
-      ]
-    }
-  },
+  "enums": {},
   "schemas": {},
   "_meta": {
     "columns": {},

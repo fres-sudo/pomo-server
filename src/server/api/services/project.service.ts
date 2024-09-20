@@ -8,34 +8,29 @@ import {
   UpdateProjectDto,
 } from "../repositories/project.repository";
 import { CreateProjectDto } from "../../../dtos/project.dto";
-
-/* -------------------------------------------------------------------------- */
-/*                                   Service                                  */
-/* -------------------------------------------------------------------------- */
-/* -------------------------------------------------------------------------- */
-/* ---------------------------------- About --------------------------------- */
-/*
-Services are responsible for handling business logic and data manipulation.
-They genreally call on repositories or other services to complete a use-case.
-*/
-/* ---------------------------------- Notes --------------------------------- */
-/*
-Services should be kept as clean and simple as possible.
-
-Create private functions to handle complex logic and keep the public methods as
-simple as possible. This makes the service easier to read, test and understand.
-*/
-/* -------------------------------------------------------------------------- */
+import { BadRequest } from "../common/errors";
+import log from "../../../utils/logger";
+import { StorageService } from "./storage.service";
 
 @injectable()
 export class ProjectService {
   constructor(
     @inject(LuciaProvider) private readonly lucia: LuciaProvider,
+    @inject(StorageService) private readonly storageService: StorageService,
     @inject(ProjectRepository)
     private readonly projectRepository: ProjectRepository,
   ) {}
 
-  async getProjectByUser(id: string) {
+  async getAllProjects() {
+    try {
+      return await this.projectRepository.findAll();
+    } catch (e) {
+      log.info(e);
+      throw BadRequest("error-getting-all-projects");
+    }
+  }
+
+  async getProjectsByUser(id: string) {
     return this.projectRepository.findAllByUser(id);
   }
 
@@ -43,7 +38,16 @@ export class ProjectService {
     return this.projectRepository.create(data);
   }
 
+  async uploadProjectImage(projectId: string, image: File) {
+    const { name } = await this.storageService.upload(image);
+    return this.projectRepository.update(projectId, { imageCover: name });
+  }
+
   async updateProject(id: string, data: UpdateProjectDto) {
     return this.projectRepository.update(id, data);
+  }
+
+  async deleteProject(id: string) {
+    return this.projectRepository.delete(id);
   }
 }

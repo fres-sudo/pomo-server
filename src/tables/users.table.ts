@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import { citext, timestamps } from "./utils";
 import { createId } from "@paralleldrive/cuid2";
 import { sessionsTable } from "./sessions.table";
-import { boolean, pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgTable, text } from "drizzle-orm/pg-core";
 import { oAuthTable } from "./oauth.table";
 import { emailVerificationsTable } from "./email-verification.table";
 import { passwordResetTable } from "./passwords-reset.table";
@@ -14,8 +14,7 @@ export const usersTable = pgTable("users", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
-  name: varchar("name", { length: 100 }).notNull(),
-  surname: varchar("surname", { length: 100 }).notNull(),
+  username: text("username").notNull().unique(),
   avatar: text("avatar"),
   email: citext("email").notNull().unique(),
   verified: boolean("verified").notNull().default(false),

@@ -1,12 +1,16 @@
 import { rateLimiter } from "hono-rate-limiter";
-import { RedisStore } from 'rate-limit-redis'
-import RedisClient from 'ioredis'
+import { RedisStore } from "rate-limit-redis";
+import RedisClient from "ioredis";
 import type { HonoTypes } from "../types";
 import { config } from "../common/config";
 
-const client = new RedisClient(config.REDIS_URL)
+//const client = new RedisClient({ host: "redis", port: 6379 });
 
-export function limiter({ limit, minutes, key = "" }: {
+export function limiter({
+  limit,
+  minutes,
+  key = "",
+}: {
   limit: number;
   minutes: number;
   key?: string;
@@ -16,17 +20,15 @@ export function limiter({ limit, minutes, key = "" }: {
     limit, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
     standardHeaders: "draft-6", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
     keyGenerator: (c) => {
-      const vars = c.var as HonoTypes['Variables'];
+      const vars = c.var as HonoTypes["Variables"];
       const clientKey = vars.user?.id || c.req.header("x-forwarded-for");
       const pathKey = key || c.req.routePath;
-      return `${clientKey}_${pathKey}`
+      return `${clientKey}_${pathKey}`;
     }, // Method to generate custom identifiers for clients.
     // Redis store configuration
-    store: new RedisStore({
+    /*store: new RedisStore({
       // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
       sendCommand: (...args: string[]) => client.call(...args),
-    }) as any,
-  })
+      }) as any,*/
+  });
 }
-
-

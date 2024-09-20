@@ -1,1 +1,69 @@
-{"version":"6","dialect":"postgresql","entries":[]}
+{
+  "version": "6",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1723393920389,
+      "tag": "0000_regular_lady_vermin",
+      "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1723393939124,
+      "tag": "0001_yummy_venus",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1723395010252,
+      "tag": "0002_gorgeous_scarlet_spider",
+      "breakpoints": false
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1723478903007,
+      "tag": "0003_huge_bishop",
+      "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1725029524465,
+      "tag": "0004_loud_owl",
+      "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1725029563405,
+      "tag": "0005_neat_proteus",
+      "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1725030278770,
+      "tag": "0006_gifted_black_tom",
+      "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1725045068676,
+      "tag": "0007_petite_mindworm",
+      "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1726244120618,
+      "tag": "0008_clean_clea",
+      "breakpoints": false
+    }
+  ]
+}
