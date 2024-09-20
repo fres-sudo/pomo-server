@@ -33,7 +33,9 @@ export class UserController implements Controller {
       .patch("/:userId", zValidator("json", updateUserDto), async (context) => {
         const { username } = context.req.valid("json");
         const { userId } = context.req.param();
-        const updatedUser = this.userService.updateUser(userId, { username });
+        const updatedUser = await this.userService.updateUser(userId, {
+          username,
+        });
         return context.json(updatedUser);
       });
   }

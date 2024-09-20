@@ -3,16 +3,17 @@ import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { usersTable } from "./users.table";
 import { timestamps } from "./utils";
+import { citext } from "./utils";
 
 export const passwordResetTable = pgTable("passwordResetTable", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => createId()),
   hashedToken: text("hashed_token").notNull(),
-  userId: text("user_id")
+  email: citext("email")
     .notNull()
-    .references(() => usersTable.id)
-    .unique(),
+    .unique()
+    .references(() => usersTable.email),
   expiresAt: timestamp("expires_at", {
     mode: "date",
     withTimezone: true,
@@ -24,7 +25,7 @@ export const passwordResetRelationships = relations(
   passwordResetTable,
   ({ one }) => ({
     user: one(usersTable, {
-      fields: [passwordResetTable.userId],
+      fields: [passwordResetTable.email],
       references: [usersTable.id],
     }),
   }),

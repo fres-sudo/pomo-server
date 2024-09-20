@@ -87,7 +87,12 @@ export class AuthService {
       const newUser = await this.usersRepository.create(data);
 
       const { token, expiry, hashedToken } =
-        await this.tokensService.generateTokenWithExpiryAndHash(15, "m");
+        await this.tokensService.generateTokenWithExpiryAndHash(
+          15,
+          30,
+          "m",
+          "STRING",
+        );
 
       // create a new email verification record
       await this.emailVerificationRepository.create({

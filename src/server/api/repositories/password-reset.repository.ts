@@ -8,7 +8,7 @@ import { passwordResetTable } from "./../../../tables/passwords-reset.table";
 
 export type CreatePasswordReset = Pick<
   InferInsertModel<typeof passwordResetTable>,
-  "hashedToken" | "userId" | "expiresAt"
+  "hashedToken" | "email" | "expiresAt"
 >;
 
 @injectable()
@@ -23,32 +23,23 @@ export class PasswordResetRepository implements Repository {
       .insert(passwordResetTable)
       .values(data)
       .onConflictDoUpdate({
-        target: passwordResetTable.userId,
+        target: passwordResetTable.email,
         set: data,
       })
       .returning()
       .then(takeFirstOrThrow);
   }
 
-  // finds a valid record by token and userId
-  async findValidRecord(userId: string) {
+  async findValidRecordByEmail(email: string) {
     return this.db
       .select()
       .from(passwordResetTable)
       .where(
         and(
-          eq(passwordResetTable.userId, userId),
+          eq(passwordResetTable.email, email),
           gte(passwordResetTable.expiresAt, new Date()),
         ),
       )
-      .then(takeFirst);
-  }
-
-  async findValidRecordByToken(token: string) {
-    return this.db
-      .select()
-      .from(passwordResetTable)
-      .where(eq(passwordResetTable.hashedToken, token))
       .then(takeFirst);
   }
 

@@ -9,25 +9,46 @@ export class TokensService {
     @inject(HashingService) private readonly hashingService: HashingService,
   ) {}
 
-  generateToken() {
-    const alphabet = "23456789ACDEFGHJKLMNPQRSTUVWXYZ"; // alphabet with removed look-alike characters (0, 1, O, I)
-    return generateRandomString(32, alphabet);
+  generateNumberToken(number: number) {
+    const alphabet = "1234567890";
+    return generateRandomString(number, alphabet);
   }
 
-  generateTokenWithExpiry(number: number, lifespan: TimeSpanUnit) {
+  generateStringToken(number: number) {
+    const alphabet = "23456789ABCDEFGHJKLMNPQRSTUVZ";
+    return generateRandomString(number, alphabet);
+  }
+
+  generateTokenWithExpiry(
+    number: number,
+    time: number,
+    lifespan: TimeSpanUnit,
+    type: "NUMBER" | "STRING",
+  ) {
     return {
-      token: this.generateToken(),
-      expiry: createDate(new TimeSpan(number, lifespan)),
+      token:
+        type === "NUMBER"
+          ? this.generateNumberToken(number)
+          : this.generateStringToken(number),
+      expiry: createDate(new TimeSpan(time, lifespan)),
     };
   }
 
-  async generateTokenWithExpiryAndHash(number: number, lifespan: TimeSpanUnit) {
-    const token = this.generateToken();
+  async generateTokenWithExpiryAndHash(
+    number: number,
+    time: number,
+    lifespan: TimeSpanUnit,
+    type: "NUMBER" | "STRING",
+  ) {
+    const token =
+      type === "NUMBER"
+        ? this.generateNumberToken(number)
+        : this.generateStringToken(number);
     const hashedToken = await this.hashingService.hash(token);
     return {
       token,
       hashedToken,
-      expiry: createDate(new TimeSpan(number, lifespan)),
+      expiry: createDate(new TimeSpan(time, lifespan)),
     };
   }
 

@@ -32,6 +32,7 @@ export const passwordResetDto = z
       .string({ required_error: "required-confirmation-password" })
       .min(8, "password-too-short")
       .max(32, "password-too-long"),
+    email: z.string().email(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: "passwords-donot-match",

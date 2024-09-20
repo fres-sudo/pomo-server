@@ -26,7 +26,12 @@ export class EmailVerificationsService {
   ) {
     // generate a token and expiry
     const { token, expiry, hashedToken } =
-      await this.tokensService.generateTokenWithExpiryAndHash(15, "m");
+      await this.tokensService.generateTokenWithExpiryAndHash(
+        15,
+        30,
+        "m",
+        "STRING",
+      );
     const user = await this.usersRepository.findOneByIdOrThrow(userId);
 
     // create a new email verification record

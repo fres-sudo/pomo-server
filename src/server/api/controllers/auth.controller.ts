@@ -12,22 +12,16 @@ import { EmailVerificationsService } from "../services/email-verifications.servi
 import { createUserDto, User } from "./../../../dtos/user.dto";
 import { AuthService } from "../services/auth.service";
 import { loginDto } from "./../../../dtos/login.dto";
-import { PasswordResetRepository } from "../repositories/password-reset.repository";
 import { PasswordResetService } from "../services/password-reset.service";
 import {
   passwordResetDto,
   passwordResetEmailDto,
 } from "./../../../dtos/password-reset.dto";
 import { OAuthService } from "../services/oauth.service";
-import type { GoogleAuthInfo } from "../interfaces/oauth.intefrace";
-import { serializeCookie } from "oslo/cookie";
-import { config } from "../common/config";
 import log from "./../../../utils/logger";
-import { validator } from "hono/validator";
-import { cuid2 } from "../../../tables/utils";
 import { createId } from "@paralleldrive/cuid2";
 import { OAuthData, oAuthRequest } from "../../../dtos/oauth.dto";
-
+import { z } from "zod";
 import { readFileSync } from "fs";
 import { join } from "path";
 
@@ -59,7 +53,6 @@ export class AuthController implements Controller {
         //limiter({ limit: 10, minutes: 60 }),
         async (context) => {
           const body = context.req.valid("json");
-          log.info("BODY:", body);
           const { sessionCookie, user } = await this.authService.login(body);
           setCookie(
             context,
@@ -109,7 +102,7 @@ export class AuthController implements Controller {
         },
       )
       .post(
-        "/resetpassword",
+        "/forgotpassword",
         zValidator("json", passwordResetEmailDto),
         limiter({ limit: 10, minutes: 60 }),
         async (context) => {
@@ -121,16 +114,29 @@ export class AuthController implements Controller {
         },
       )
       .post(
+        "/verify-token",
+        zValidator(
+          "json",
+          z.object({
+            email: z.string().email(),
+            token: z.string().min(6).max(6),
+          }),
+        ),
+        async (context) => {
+          const { email, token } = context.req.valid("json");
+          await this.passwordResetTokenService.validateToken(token, email);
+          return context.json({ status: "success " });
+        },
+      )
+      .post(
         "/resetpassword/:token",
         zValidator("json", passwordResetDto),
         limiter({ limit: 10, minutes: 60 }),
         async (context) => {
-          const { password, passwordConfirmation } = context.req.valid("json");
-          const { token } = context.req.param();
-          const sessionCookie = await this.passwordResetTokenService.validate(
-            { password, passwordConfirmation },
-            token,
-          );
+          const body = context.req.valid("json");
+          const token = context.req.param("token");
+          const sessionCookie =
+            await this.passwordResetTokenService.resetPassword(token, body);
           setCookie(
             context,
             sessionCookie.name,
