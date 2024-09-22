@@ -27,6 +27,7 @@ export class UserController implements Controller {
       .get("/", async (context) => {
         const query = context.req.query("username");
         const response = await this.userService.findUserByUsername(query ?? "");
+        console.log({ response });
         return context.json(response?.username);
       })
       .delete("/:userId", requireAuth, async (context) => {

@@ -47,36 +47,28 @@ export class ProjectController implements Controller {
       .put("/image/:projectId", async (context) => {
         const image = await context.req.parseBody();
         const projecId = context.req.param("projectId");
-        const updatedProject = this.projectService.uploadProjectImage(
+        const updatedProject = await this.projectService.uploadProjectImage(
           projecId,
           image["image"] as File,
         );
         return context.json(updatedProject);
       })
-      .delete(
-        "/image/:projectId",
-        zValidator(
-          "json",
-          z.object({
-            imageCover: z.string(),
-          }),
-        ),
-        requireAuth,
-        async (context) => {
-          const projectId = context.req.param("projectId");
-          const updatedProject =
-            await this.projectService.deleteProjectImage(projectId);
-          return context.json(updatedProject);
-        },
-      )
+      .delete("/image/:projectId", requireAuth, async (context) => {
+        const projectId = context.req.param("projectId");
+        const updatedProject =
+          await this.projectService.deleteProjectImage(projectId);
+        return context.json(updatedProject);
+      })
       .patch(
         "/:projectId",
         zValidator("json", updateProjectDto),
         async (context) => {
           const { projectId } = context.req.param();
           const data = context.req.valid("json");
-          const updatedProject: Project =
-            await this.projectService.updateProject(projectId, data);
+          const updatedProject = await this.projectService.updateProject(
+            projectId,
+            data,
+          );
           return context.json(updatedProject);
         },
       )
