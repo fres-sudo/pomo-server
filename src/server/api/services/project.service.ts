@@ -39,15 +39,34 @@ export class ProjectService {
   }
 
   async uploadProjectImage(projectId: string, image: File) {
-    const { name } = await this.storageService.upload(image);
-    return this.projectRepository.update(projectId, { imageCover: name });
+    const project = await this.projectRepository.findOneById(projectId);
+    if (project?.imageCover) {
+      const key = this.storageService.parseKey(project?.imageCover);
+      await this.storageService.delete(key);
+    }
+    const { key } = await this.storageService.upload(image);
+    const url = this.storageService.parseUrl(key);
+    return this.projectRepository.update(projectId, { imageCover: url });
   }
 
+  async deleteProjectImage(projectId: string) {
+    const project = await this.projectRepository.findOneById(projectId);
+    if (project?.imageCover) {
+      const key = this.storageService.parseKey(project?.imageCover);
+      await this.storageService.delete(key);
+    }
+    return this.projectRepository.update(projectId, { imageCover: null });
+  }
   async updateProject(id: string, data: UpdateProjectDto) {
     return this.projectRepository.update(id, data);
   }
 
   async deleteProject(id: string) {
+    const project = await this.projectRepository.findOneById(id);
+    if (project?.imageCover) {
+      const key = this.storageService.parseKey(project.imageCover);
+      await this.storageService.delete(key);
+    }
     return this.projectRepository.delete(id);
   }
 }

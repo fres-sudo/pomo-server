@@ -10,7 +10,8 @@ import {
 } from "./../../../dtos/user.dto";
 import type { Controller } from "../interfaces/controller.interface";
 import { zValidator } from "@hono/zod-validator";
-
+import { requireAuth } from "../middleware/auth.middleware";
+import { z } from "zod";
 @injectable()
 export class UserController implements Controller {
   controller = new Hono<HonoTypes>();
@@ -25,11 +26,42 @@ export class UserController implements Controller {
       })
       .get("/", async (context) => {
         const query = context.req.query("username");
-        const { username } = await this.userService.findUserByUsername(
-          query ?? "",
-        );
-        return context.json(username);
+        const response = await this.userService.findUserByUsername(query ?? "");
+        return context.json(response?.username);
       })
+      .delete("/:userId", requireAuth, async (context) => {
+        const userId = context.req.param("userId");
+        await this.userService.deleteUser(userId);
+        return context.json({ success: "success" });
+      })
+      .put("/image/:userId", requireAuth, async (context) => {
+        const userId = context.req.param("userId");
+        const image = await context.req.parseBody();
+        const updatedUser = this.userService.uploadAvatarImage(
+          userId,
+          image["image"] as File,
+        );
+        return context.json(updatedUser);
+      })
+      .delete(
+        "/image/:userId",
+        zValidator(
+          "json",
+          z.object({
+            avatar: z.string(),
+          }),
+        ),
+        requireAuth,
+        async (context) => {
+          const userId = context.req.param("userId");
+          const { avatar } = context.req.valid("json");
+          const updatedUser = await this.userService.deleteAvatarImage(
+            userId,
+            avatar,
+          );
+          return context.json(updatedUser);
+        },
+      )
       .patch("/:userId", zValidator("json", updateUserDto), async (context) => {
         const { username } = context.req.valid("json");
         const { userId } = context.req.param();

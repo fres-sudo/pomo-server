@@ -78,21 +78,18 @@ export class PasswordResetService {
         throw BadRequest("no-user-with-this-email");
       }
 
-      if (data.password !== data.passwordConfirmation) {
+      if (data.newPassword !== data.confirmNewPassword) {
         throw BadRequest("password-donot-match");
       }
 
       await this.passwordResetRepository.deleteById(record.id);
       await this.lucia.invalidateUserSessions(user.id);
 
-      const hashedPassword = await this.hashingService.hash(data.password);
+      const hashedPassword = await this.hashingService.hash(data.newPassword);
 
       await this.usersRepository.update(user.id, {
         password: hashedPassword,
       });
-
-      const session = await this.lucia.createSession(user.id, {});
-      return this.lucia.createSessionCookie(session.id);
     } catch (e) {
       log.error(e);
       if (e instanceof HTTPException) {

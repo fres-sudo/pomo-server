@@ -4,6 +4,9 @@ import nodemailer from "nodemailer";
 import handlebars from "handlebars";
 import { fileURLToPath } from "url";
 import { injectable } from "tsyringe";
+import { HTTPException } from "hono/http-exception";
+import { throws } from "assert";
+import { InternalError } from "../common/errors";
 
 /* -------------------------------------------------------------------------- */
 /*                                   Service                                  */
@@ -48,20 +51,34 @@ export class MailerService {
 
   sendEmailVerificationToken(data: SendTemplate<{ link: string }>) {
     const template = handlebars.compile(this.getTemplate("email-verification"));
-    return this.send({
-      to: data.to,
-      subject: "Email Verification",
-      html: template({ link: data.props.link }),
-    });
+    try {
+      return this.send({
+        to: data.to,
+        subject: "Email Verification",
+        html: template({ link: data.props.link }),
+      });
+    } catch (e) {
+      if (e instanceof HTTPException) {
+        throw e;
+      }
+      throw InternalError("email-error");
+    }
   }
 
   sendPasswordResetEmail(data: SendTemplate<{ link: string }>) {
     const template = handlebars.compile(this.getTemplate("email-verification"));
-    return this.send({
-      to: data.to,
-      subject: "Password Reset",
-      html: template({ link: data.props.link }),
-    });
+    try {
+      return this.send({
+        to: data.to,
+        subject: "Password Reset",
+        html: template({ link: data.props.link }),
+      });
+    } catch (e) {
+      if (e instanceof HTTPException) {
+        throw e;
+      }
+      throw InternalError("email-error");
+    }
   }
 
   sendEmailChangeNotification(data: SendTemplate<null>) {

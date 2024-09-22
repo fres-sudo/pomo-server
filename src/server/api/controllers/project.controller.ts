@@ -12,6 +12,7 @@ import {
 } from "../../../dtos/project.dto";
 import { zValidator } from "@hono/zod-validator";
 import { requireAuth } from "../middleware/auth.middleware";
+import { z } from "zod";
 
 @injectable()
 export class ProjectController implements Controller {
@@ -46,13 +47,28 @@ export class ProjectController implements Controller {
       .put("/image/:projectId", async (context) => {
         const image = await context.req.parseBody();
         const projecId = context.req.param("projectId");
-        console.log(image["image"]);
         const updatedProject = this.projectService.uploadProjectImage(
           projecId,
           image["image"] as File,
         );
         return context.json(updatedProject);
       })
+      .delete(
+        "/image/:projectId",
+        zValidator(
+          "json",
+          z.object({
+            imageCover: z.string(),
+          }),
+        ),
+        requireAuth,
+        async (context) => {
+          const projectId = context.req.param("projectId");
+          const updatedProject =
+            await this.projectService.deleteProjectImage(projectId);
+          return context.json(updatedProject);
+        },
+      )
       .patch(
         "/:projectId",
         zValidator("json", updateProjectDto),

@@ -95,7 +95,7 @@ export class AuthController implements Controller {
             token,
           );
 
-          const htmlPath = join(__dirname, "/ui/verify-email.html");
+          const htmlPath = join(__dirname, "../../../ui/verify-email.html");
           const htmlContent = readFileSync(htmlPath, "utf-8");
 
           return context.html(htmlContent);
@@ -135,14 +135,7 @@ export class AuthController implements Controller {
         async (context) => {
           const body = context.req.valid("json");
           const token = context.req.param("token");
-          const sessionCookie =
-            await this.passwordResetTokenService.resetPassword(token, body);
-          setCookie(
-            context,
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes,
-          );
+          await this.passwordResetTokenService.resetPassword(token, body);
           return context.json({ status: "success" });
         },
       )

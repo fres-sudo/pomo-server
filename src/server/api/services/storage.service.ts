@@ -1,6 +1,7 @@
 import {
   PutObjectCommand,
   DeleteObjectCommand,
+  PutObjectCommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { createId } from "@paralleldrive/cuid2";
@@ -36,8 +37,6 @@ export class StorageService {
 
     const response = await this.s3Client.send(uploadCommand);
 
-    log.info({ response });
-
     return {
       ...response,
       size: file.size,
@@ -45,6 +44,18 @@ export class StorageService {
       type: file.type,
       key,
     };
+  }
+
+  parseUrl(key: string) {
+    return `https://${config.storage.name}.s3.${config.storage.region}.amazonaws.com/${config.storage.name}/${key}`;
+  }
+
+  parseKey(url: string) {
+    const bucketUrl = `https://${config.storage.name}.s3.${config.storage.region}.amazonaws.com/${config.storage.name}/`;
+    if (url.startsWith(bucketUrl)) {
+      return url.slice(bucketUrl.length);
+    }
+    throw new Error("Invalid S3 URL");
   }
 
   delete(key: string) {

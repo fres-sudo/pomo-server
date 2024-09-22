@@ -34,6 +34,24 @@ export class AuthService {
         throw BadRequest("invalid-email");
       }
       if (!user.verified) {
+        const emailVerification =
+          await this.emailVerificationRepository.findValidRecord(user.id);
+
+        // If the user has not a pending email verification
+        if (!emailVerification) {
+          await this.handleExpiredTokenAndResendVerification({
+            id: user.id,
+            email: user.email,
+          });
+        } else {
+          //If the user has pending email verification but they are expired
+          if (new Date() > new Date(emailVerification.expiresAt)) {
+            await this.handleExpiredTokenAndResendVerification({
+              id: user.id,
+              email: user.email,
+            });
+          }
+        }
         throw BadRequest("email-not-verified");
       }
       const hashedPassword = await this.hashingService.verify(
@@ -86,27 +104,9 @@ export class AuthService {
       data.password = hashedPassword;
       const newUser = await this.usersRepository.create(data);
 
-      const { token, expiry, hashedToken } =
-        await this.tokensService.generateTokenWithExpiryAndHash(
-          15,
-          30,
-          "m",
-          "STRING",
-        );
-
-      // create a new email verification record
-      await this.emailVerificationRepository.create({
-        requestedEmail: newUser.email,
-        userId: newUser.id,
-        hashedToken,
-        expiresAt: expiry,
-      });
-
-      this.mailerService.sendEmailVerificationToken({
-        to: data.email,
-        props: {
-          link: `${config.api.origin}/api/auth/verify/${newUser.id}/${token}`,
-        },
+      this.handleExpiredTokenAndResendVerification({
+        id: newUser.id,
+        email: newUser.email,
       });
 
       return newUser;
@@ -121,5 +121,35 @@ export class AuthService {
 
   async logout(sessionId: string) {
     return this.lucia.invalidateSession(sessionId);
+  }
+
+  // Private function to handle token generation, update, and email sending
+  private async handleExpiredTokenAndResendVerification(user: {
+    id: string;
+    email: string;
+  }) {
+    const { token, expiry, hashedToken } =
+      await this.tokensService.generateTokenWithExpiryAndHash(
+        15,
+        30,
+        "m",
+        "STRING",
+      );
+
+    // Update the email verification record with the new token
+    await this.emailVerificationRepository.create({
+      userId: user.id,
+      requestedEmail: user.email,
+      hashedToken,
+      expiresAt: expiry,
+    });
+
+    // Resend the email verification link
+    this.mailerService.sendEmailVerificationToken({
+      to: user.email,
+      props: {
+        link: `${config.api.origin}/api/auth/verify/${user.id}/${token}`,
+      },
+    });
   }
 }

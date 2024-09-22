@@ -76,6 +76,10 @@ export class UsersRepository implements Repository {
       .then(takeFirstOrThrow);
   }
 
+  async delete(userId: string) {
+    return this.db.delete(usersTable).where(eq(usersTable.id, userId));
+  }
+
   trxHost(trx: DatabaseProvider) {
     return new UsersRepository(trx);
   }

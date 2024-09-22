@@ -24,17 +24,17 @@ export const passwordResetEmailDto = z.object({
 
 export const passwordResetDto = z
   .object({
-    password: z
+    newPassword: z
       .string({ required_error: "required-password" })
       .min(8, "password-too-short")
       .max(32, "password-too-long"),
-    passwordConfirmation: z
+    confirmNewPassword: z
       .string({ required_error: "required-confirmation-password" })
       .min(8, "password-too-short")
       .max(32, "password-too-long"),
     email: z.string().email(),
   })
-  .refine((data) => data.password === data.passwordConfirmation, {
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "passwords-donot-match",
     path: ["passwordConfirmation"],
   });
