@@ -49,6 +49,7 @@ export class UserController implements Controller {
         })
         .delete(
           "/image/:userId",
+          requireAuth,
           zValidator(
             "json",
             z.object({

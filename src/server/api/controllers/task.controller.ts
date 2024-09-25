@@ -1,14 +1,12 @@
 import { Hono } from "hono";
 import type { HonoTypes } from "../types";
 import { inject, injectable } from "tsyringe";
-import { UserService } from "../services/user.service";
-import { createUserDto, type User } from "./../../../dtos/user.dto";
 import type { Controller } from "../interfaces/controller.interface";
 import { TaskService } from "../services/task.service";
 import { Task, updateTaskDto, createTaskDto } from "../../../dtos/task.dto";
 import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
-import { log } from "console";
+import { requireAuth } from "../middleware/auth.middleware";
+
 @injectable()
 export class TaskController implements Controller {
   controller = new Hono<HonoTypes>();
@@ -21,17 +19,17 @@ export class TaskController implements Controller {
         const tasks: Task[] = await this.taskService.getAllTasks();
         return context.json(tasks);
       })
-      .get("/project/:projectId", async (context) => {
+      .get("/project/:projectId", requireAuth, async (context) => {
         const { projectId } = context.req.param();
         const tasks: Task[] = await this.taskService.getAllByProject(projectId);
         return context.json(tasks);
       })
-      .get("/user/:userId", async (context) => {
+      .get("/user/:userId", requireAuth, async (context) => {
         const { userId } = context.req.param();
         const tasks: Task[] = await this.taskService.getTasksByUser(userId);
         return context.json(tasks);
       })
-      .get("/user", async (context) => {
+      .get("/user", requireAuth, async (context) => {
         const userId = context.req.query("userId");
         const dateString = context.req.query("date");
         const type = context.req.query("type");
@@ -42,21 +40,31 @@ export class TaskController implements Controller {
             : await this.taskService.getTasksOfTheMonth(date, userId ?? "");
         return context.json(tasks);
       })
-      .post("/", zValidator("json", createTaskDto), async (context) => {
-        const data = context.req.valid("json");
-        const newTask: Task = await this.taskService.createTask(data);
-        return context.json(newTask);
-      })
-      .patch("/:taskId", zValidator("json", updateTaskDto), async (context) => {
-        const { taskId } = context.req.param();
-        const data = context.req.valid("json");
-        const updatedTask: Task = await this.taskService.updateTask(
-          taskId,
-          data,
-        );
-        return context.json(updatedTask);
-      })
-      .delete("/:taskId", async (context) => {
+      .post(
+        "/",
+        requireAuth,
+        zValidator("json", createTaskDto),
+        async (context) => {
+          const data = context.req.valid("json");
+          const newTask: Task = await this.taskService.createTask(data);
+          return context.json(newTask);
+        },
+      )
+      .patch(
+        "/:taskId",
+        requireAuth,
+        zValidator("json", updateTaskDto),
+        async (context) => {
+          const { taskId } = context.req.param();
+          const data = context.req.valid("json");
+          const updatedTask: Task = await this.taskService.updateTask(
+            taskId,
+            data,
+          );
+          return context.json(updatedTask);
+        },
+      )
+      .delete("/:taskId", requireAuth, async (context) => {
         const { taskId } = context.req.param();
         const deletedTask = await this.taskService.deleteTask(taskId);
         return context.json(deletedTask);

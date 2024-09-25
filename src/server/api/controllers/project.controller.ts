@@ -34,17 +34,22 @@ export class ProjectController implements Controller {
           await this.projectService.getProjectsByUser(userId);
         return context.json(projects);
       })
-      .post("/upload", async (c) => {
+      .post("/upload", requireAuth, async (c) => {
         const body = await c.req.parseBody();
         console.log(body["file"]); // File | string
       })
-      .post("/", zValidator("json", createProjectDto), async (context) => {
-        const data = context.req.valid("json");
-        const newProject: Project =
-          await this.projectService.createProject(data);
-        return context.json(newProject);
-      })
-      .put("/image/:projectId", async (context) => {
+      .post(
+        "/",
+        requireAuth,
+        zValidator("json", createProjectDto),
+        async (context) => {
+          const data = context.req.valid("json");
+          const newProject: Project =
+            await this.projectService.createProject(data);
+          return context.json(newProject);
+        },
+      )
+      .put("/image/:projectId", requireAuth, async (context) => {
         const image = await context.req.parseBody();
         const projecId = context.req.param("projectId");
         const updatedProject = await this.projectService.uploadProjectImage(
@@ -61,6 +66,7 @@ export class ProjectController implements Controller {
       })
       .patch(
         "/:projectId",
+        requireAuth,
         zValidator("json", updateProjectDto),
         async (context) => {
           const { projectId } = context.req.param();
