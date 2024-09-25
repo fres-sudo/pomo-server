@@ -19,57 +19,66 @@ export class UserController implements Controller {
   constructor(@inject(UserService) private readonly userService: UserService) {}
 
   routes() {
-    return this.controller
-      .get("/", async (context) => {
+    return (
+      this.controller
+        /*.get("/", async (context) => {
         const users: User[] = await this.userService.getAllUsers();
         return context.json(users);
-      })
-      .get("/", async (context) => {
-        const query = context.req.query("username");
-        const response = await this.userService.findUserByUsername(query ?? "");
-        console.log({ response });
-        return context.json(response?.username);
-      })
-      .delete("/:userId", requireAuth, async (context) => {
-        const userId = context.req.param("userId");
-        await this.userService.deleteUser(userId);
-        return context.json({ success: "success" });
-      })
-      .put("/image/:userId", requireAuth, async (context) => {
-        const userId = context.req.param("userId");
-        const image = await context.req.parseBody();
-        const updatedUser = this.userService.uploadAvatarImage(
-          userId,
-          image["image"] as File,
-        );
-        return context.json(updatedUser);
-      })
-      .delete(
-        "/image/:userId",
-        zValidator(
-          "json",
-          z.object({
-            avatar: z.string(),
-          }),
-        ),
-        requireAuth,
-        async (context) => {
+      })*/
+        .get("/", requireAuth, async (context) => {
+          const query = context.req.query("username");
+          const response = await this.userService.findUserByUsername(
+            query ?? "",
+          );
+          console.log({ response });
+          return context.json(response?.username);
+        })
+        .delete("/:userId", requireAuth, async (context) => {
           const userId = context.req.param("userId");
-          const { avatar } = context.req.valid("json");
-          const updatedUser = await this.userService.deleteAvatarImage(
+          await this.userService.deleteUser(userId);
+          return context.json({ success: "success" });
+        })
+        .put("/image/:userId", requireAuth, async (context) => {
+          const userId = context.req.param("userId");
+          const image = await context.req.parseBody();
+          const updatedUser = this.userService.uploadAvatarImage(
             userId,
-            avatar,
+            image["image"] as File,
           );
           return context.json(updatedUser);
-        },
-      )
-      .patch("/:userId", zValidator("json", updateUserDto), async (context) => {
-        const { username } = context.req.valid("json");
-        const { userId } = context.req.param();
-        const updatedUser = await this.userService.updateUser(userId, {
-          username,
-        });
-        return context.json(updatedUser);
-      });
+        })
+        .delete(
+          "/image/:userId",
+          zValidator(
+            "json",
+            z.object({
+              avatar: z.string(),
+            }),
+          ),
+          requireAuth,
+          async (context) => {
+            const userId = context.req.param("userId");
+            const { avatar } = context.req.valid("json");
+            const updatedUser = await this.userService.deleteAvatarImage(
+              userId,
+              avatar,
+            );
+            return context.json(updatedUser);
+          },
+        )
+        .patch(
+          "/:userId",
+          requireAuth,
+          zValidator("json", updateUserDto),
+          async (context) => {
+            const { username } = context.req.valid("json");
+            const { userId } = context.req.param();
+            const updatedUser = await this.userService.updateUser(userId, {
+              username,
+            });
+            return context.json(updatedUser);
+          },
+        )
+    );
   }
 }
