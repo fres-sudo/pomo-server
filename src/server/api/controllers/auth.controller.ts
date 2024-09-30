@@ -24,8 +24,6 @@ import { join } from "path";
 import { limiter } from "../middleware/rate-limiter.middlware";
 import { setCookie, getCookie } from "hono/cookie";
 import { RefreshTokenService } from "../services/refresh-token.service";
-import { jwt } from "hono/jwt";
-import { config } from "../common/config";
 
 @injectable()
 export class AuthController implements Controller {
@@ -71,21 +69,11 @@ export class AuthController implements Controller {
           return context.json(newUser);
         },
       )
-      .post(
-        "/logout",
-        zValidator(
-          "json",
-          z.object({
-            userId: z.string(),
-          }),
-        ),
-        requireAuth,
-        async (context) => {
-          const { userId } = context.req.valid("json");
-          await this.refreshTokenService.invalidateUserSessions(userId);
-          return context.json({ status: "success" });
-        },
-      )
+      .post("/logout", requireAuth, async (context) => {
+        const userId = context.var.userId;
+        await this.refreshTokenService.invalidateUserSessions(userId);
+        return context.json({ status: "success" });
+      })
       .post(
         "/refresh-token",
         zValidator(
