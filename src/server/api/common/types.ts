@@ -4,6 +4,7 @@ export interface Config {
   storage: StorageConfig;
   redis: RedisConfig;
   postgres: PostgresConfig;
+  jwt: JwtConfig;
 }
 
 interface ApiConfig {
@@ -24,4 +25,11 @@ interface RedisConfig {
 
 interface PostgresConfig {
   url: string;
+}
+
+interface JwtConfig {
+  accessSecret: string;
+  refreshSecret: string;
+  accessExpiresIn: number;
+  refreshExpiresIn: number;
 }

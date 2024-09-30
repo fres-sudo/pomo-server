@@ -33,9 +33,12 @@ export class UserService {
     return this.userRepository.update(userId, { avatar: url });
   }
 
-  async deleteAvatarImage(userId: string, avatar: string) {
-    const key = this.storageService.parseUrl(avatar);
-    await this.storageService.delete(key);
+  async deleteAvatarImage(userId: string) {
+    const user = await this.userRepository.findOneById(userId);
+    if (user?.avatar) {
+      const key = this.storageService.parseUrl(user?.avatar);
+      await this.storageService.delete(key);
+    }
     return this.userRepository.update(userId, { avatar: null });
   }
 

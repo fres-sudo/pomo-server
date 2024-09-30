@@ -18,7 +18,7 @@ import { usersTable } from "./tables";
 import { StatsController } from "./server/api/controllers/stats.controller";
 import { readFileSync } from "fs";
 import { join } from "path";
-
+import { logger } from "hono/logger";
 /* ----------------------------------- Api ---------------------------------- */
 const app = new Hono().basePath("/api");
 
@@ -26,6 +26,7 @@ const app = new Hono().basePath("/api");
 
 app.use("*", cors({ origin: "*" })); // Allow CORS for all origins
 app.use(validateAuthSession);
+app.use(logger());
 
 /* --------------------------------- Routes --------------------------------- */
 const authRoutes = container.resolve(AuthController).routes();

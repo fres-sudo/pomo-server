@@ -12,6 +12,10 @@ import { EmailVerificationsService } from "./email-verifications.service";
 import { HTTPException } from "hono/http-exception";
 import { EmailVerificationsRepository } from "../repositories/email-verifications.repository";
 import log from "../../../utils/logger";
+import { jwt, sign, verify } from "hono/jwt";
+import { RefreshTokenRepository } from "../repositories/refresh-token.repository";
+import { RefreshTokenService } from "./refresh-token.service";
+import { JWTPayload } from "hono/utils/jwt/types";
 
 @injectable()
 export class AuthService {
@@ -25,6 +29,8 @@ export class AuthService {
     private readonly emailVerificationToken: EmailVerificationsService,
     @inject(UsersRepository) private readonly usersRepository: UsersRepository,
     @inject(HashingService) private readonly hashingService: HashingService,
+    @inject(RefreshTokenService)
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   async login(data: LoginDto) {
@@ -62,11 +68,15 @@ export class AuthService {
       if (!hashedPassword) {
         throw BadRequest("wrong-password");
       }
-      const session = await this.lucia.createSession(user.id, {});
-      return {
-        sessionCookie: this.lucia.createSessionCookie(session.id),
-        user,
-      };
+
+      const accessToken = await this.refreshTokenService.generateAccessToken(
+        user.id,
+      );
+      const refreshToken = await this.refreshTokenService.generateRefreshToken(
+        user.id,
+      );
+
+      return { user, accessToken, refreshToken };
     } catch (e) {
       log.error(e);
       if (e instanceof HTTPException) {
@@ -119,8 +129,14 @@ export class AuthService {
     }
   }
 
-  async logout(sessionId: string) {
-    return this.lucia.invalidateSession(sessionId);
+  async logout(refreshToken: string) {
+    try {
+      // Remove the refresh token from the database
+      await this.refreshTokenService.removeRefreshToken(refreshToken);
+    } catch (e) {
+      log.error(e);
+      throw InternalError("error-logout");
+    }
   }
 
   // Private function to handle token generation, update, and email sending

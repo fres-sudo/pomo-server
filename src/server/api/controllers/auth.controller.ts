@@ -1,12 +1,9 @@
 import { Hono } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
 import type { HonoTypes } from "../types";
 import { inject, injectable } from "tsyringe";
 import { zValidator } from "@hono/zod-validator";
 import { UserService } from "../services/user.service";
-import { LuciaProvider } from "../providers/lucia.provider";
 import { requireAuth } from "../middleware/auth.middleware";
-import { limiter } from "../middleware/rate-limiter.middlware";
 import type { Controller } from "../interfaces/controller.interface";
 import { EmailVerificationsService } from "../services/email-verifications.service";
 import { createUserDto, User } from "./../../../dtos/user.dto";
@@ -24,67 +21,90 @@ import { OAuthData, oAuthRequest } from "../../../dtos/oauth.dto";
 import { z } from "zod";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { limiter } from "../middleware/rate-limiter.middlware";
+import { setCookie, getCookie } from "hono/cookie";
+import { RefreshTokenService } from "../services/refresh-token.service";
+import { jwt } from "hono/jwt";
+import { config } from "../common/config";
 
 @injectable()
 export class AuthController implements Controller {
   controller = new Hono<HonoTypes>();
 
   constructor(
-    @inject(UserService) private iamService: UserService,
-    @inject(AuthService)
-    private authService: AuthService,
+    @inject(UserService) private userService: UserService,
+    @inject(AuthService) private authService: AuthService,
     @inject(EmailVerificationsService)
     private emailVerificationsService: EmailVerificationsService,
-    @inject(LuciaProvider) private lucia: LuciaProvider,
     @inject(PasswordResetService)
     private readonly passwordResetTokenService: PasswordResetService,
     @inject(OAuthService) private readonly oAuthService: OAuthService,
+    @inject(RefreshTokenService)
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   routes() {
     return this.controller
-      .get("/user", async (context) => {
+      .get("/user", requireAuth, async (context) => {
         const user = context.var.user;
         return context.json({ user: user });
       })
       .post(
         "/login",
         zValidator("json", loginDto),
-        //limiter({ limit: 10, minutes: 60 }),
+        limiter({ limit: 10, minutes: 60 }),
         async (context) => {
           const body = context.req.valid("json");
-          const { sessionCookie, user } = await this.authService.login(body);
-          setCookie(
-            context,
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes,
-          );
-          return context.json(user);
+          log.info({ body });
+          const { user, accessToken, refreshToken } =
+            await this.authService.login(body);
+          return context.json({ user, accessToken, refreshToken });
         },
       )
       .post(
         "/signup",
         zValidator("json", createUserDto),
-        //limiter({ limit: 10, minutes: 60 }),
+        limiter({ limit: 10, minutes: 60 }),
         async (context) => {
           const data = context.req.valid("json");
           const newUser: User = await this.authService.signup(data);
           return context.json(newUser);
         },
       )
-      .post("/logout", requireAuth, async (context) => {
-        const sessionId = context.var.session.id;
-        await this.iamService.logout(sessionId);
-        const sessionCookie = this.lucia.createBlankSessionCookie();
-        setCookie(
-          context,
-          sessionCookie.name,
-          sessionCookie.value,
-          sessionCookie.attributes,
-        );
-        return context.json({ status: "success" });
-      })
+      .post(
+        "/logout",
+        zValidator(
+          "json",
+          z.object({
+            userId: z.string(),
+          }),
+        ),
+        requireAuth,
+        async (context) => {
+          const { userId } = context.req.valid("json");
+          await this.refreshTokenService.invalidateUserSessions(userId);
+          return context.json({ status: "success" });
+        },
+      )
+      .post(
+        "/refresh-token",
+        zValidator(
+          "json",
+          z.object({
+            refreshToken: z.string(),
+          }),
+        ),
+        async (context) => {
+          const { refreshToken } = context.req.valid("json");
+
+          if (!refreshToken) {
+            return context.json("refresh-token-not-provided", 400);
+          }
+          const { accessToken, refreshToken: newRefreshToken } =
+            await this.refreshTokenService.refreshToken(refreshToken);
+          return context.json({ accessToken, refreshToken: newRefreshToken });
+        },
+      )
       .get(
         "/verify/:userId/:token",
         limiter({ limit: 10, minutes: 60 }),
@@ -172,7 +192,7 @@ export class AuthController implements Controller {
           const body = context.req.valid("json");
           const providerUserId = body.providerUserId ?? createId();
           const oAuthData: OAuthData = {
-            providerId: "google",
+            providerId: "apple",
             providerUserId,
             email: body.email,
             username: body.username,

@@ -41,32 +41,17 @@ export class UserController implements Controller {
         .put("/image/:userId", requireAuth, async (context) => {
           const userId = context.req.param("userId");
           const image = await context.req.parseBody();
-          const updatedUser = this.userService.uploadAvatarImage(
+          const updatedUser = await this.userService.uploadAvatarImage(
             userId,
-            image["image"] as File,
+            image["photo"] as File,
           );
           return context.json(updatedUser);
         })
-        .delete(
-          "/image/:userId",
-          requireAuth,
-          zValidator(
-            "json",
-            z.object({
-              avatar: z.string(),
-            }),
-          ),
-          requireAuth,
-          async (context) => {
-            const userId = context.req.param("userId");
-            const { avatar } = context.req.valid("json");
-            const updatedUser = await this.userService.deleteAvatarImage(
-              userId,
-              avatar,
-            );
-            return context.json(updatedUser);
-          },
-        )
+        .delete("/image/:userId", requireAuth, async (context) => {
+          const userId = context.req.param("userId");
+          const updatedUser = await this.userService.deleteAvatarImage(userId);
+          return context.json(updatedUser);
+        })
         .patch(
           "/:userId",
           requireAuth,
