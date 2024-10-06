@@ -1,14 +1,9 @@
 import type { MiddlewareHandler } from "hono";
 import { createMiddleware } from "hono/factory";
 import type { HonoTypes } from "../types";
-import { lucia } from "../infrastructure/auth/lucia";
-import { verifyRequestOrigin } from "lucia";
-import type { Session, User } from "lucia";
 import { Unauthorized } from "../common/errors";
 import { verify } from "hono/jwt";
 import { config } from "../common/config";
-import { logger } from "hono/logger";
-import log from "../../../utils/logger";
 
 export const verifyOrigin: MiddlewareHandler<HonoTypes> = createMiddleware(
   async (c, next) => {
@@ -17,11 +12,7 @@ export const verifyOrigin: MiddlewareHandler<HonoTypes> = createMiddleware(
     }
     const originHeader = c.req.header("Origin") ?? null;
     const hostHeader = c.req.header("Host") ?? null;
-    if (
-      !originHeader ||
-      !hostHeader ||
-      !verifyRequestOrigin(originHeader, [hostHeader])
-    ) {
+    if (!originHeader || !hostHeader) {
       return c.body(null, 403);
     }
     return next();
@@ -31,8 +22,6 @@ export const verifyOrigin: MiddlewareHandler<HonoTypes> = createMiddleware(
 export const validateAuthSession: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.header("Authorization") ?? "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
-
-  log.info({ authHeader });
 
   if (!token) {
     c.set("userId", null);
@@ -49,8 +38,7 @@ export const validateAuthSession: MiddlewareHandler = async (c, next) => {
       return next();
     }
 
-    log.info({ userId });
-    // Set user in context
+    // Set user id in context
     c.set("userId", userId);
   } catch (error) {
     // If token verification fails, set user to null
@@ -62,7 +50,6 @@ export const validateAuthSession: MiddlewareHandler = async (c, next) => {
 
 export const requireAuth: MiddlewareHandler<{
   Variables: {
-    session: Session;
     userId: string;
   };
 }> = createMiddleware(async (c, next) => {

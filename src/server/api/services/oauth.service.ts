@@ -8,8 +8,10 @@ import {
   generateCodeVerifier,
   generateState,
   Google,
+  Apple,
   OAuth2RequestError,
   type GoogleTokens,
+  AppleCredentials,
 } from "arctic";
 import type {
   GoogleAuthInfo,
@@ -22,17 +24,16 @@ import type { Context } from "hono";
 import { usersTable } from "../../../tables";
 import { DatabaseProvider } from "../providers";
 import { Session } from "lucia";
+import { RefreshTokenService } from "./refresh-token.service";
 
 @injectable()
 export class OAuthService {
   public google: Google;
 
   constructor(
-    @inject(DatabaseProvider) private db: DatabaseProvider,
-    @inject(LuciaProvider) private readonly lucia: LuciaProvider,
-    @inject(TokensService) private readonly tokensService: TokensService,
     @inject(UsersRepository) private readonly usersRepository: UsersRepository,
-    @inject(HashingService) private readonly hashingService: HashingService,
+    @inject(RefreshTokenService)
+    private readonly refreshTokenService: RefreshTokenService,
     @inject(OAuthRepository) private readonly oAuthRepository: OAuthRepository,
   ) {
     this.google = new Google(
@@ -50,9 +51,15 @@ export class OAuthService {
     avatar?: string;
   }) {
     const user = await this.oAuthRepository.createOrRetrieveUser(oAuthData);
-    const session = await this.lucia.createSession(user.id, {});
+    const refreshToken = await this.refreshTokenService.generateRefreshToken(
+      user.id,
+    );
+    const accessToken = await this.refreshTokenService.generateAccessToken(
+      user.id,
+    );
     return {
-      sessionCookie: await this.lucia.createSessionCookie(session.id),
+      refreshToken,
+      accessToken,
       user,
     };
   }
@@ -70,7 +77,7 @@ export class OAuthService {
     });
 
     //create OAuth account
-    const newAccount = this.oAuthRepository.create({
+    await this.oAuthRepository.create({
       userId: newUser.id,
       providerId: userInfo.provider,
       providerUserId: userInfo.id,
@@ -83,12 +90,24 @@ export class OAuthService {
     const existingUser = await this.checkForExistingUser(userInfo);
 
     if (existingUser) {
-      return await this.lucia.createSession(existingUser.users.id, {});
+      const refreshToken = await this.refreshTokenService.generateRefreshToken(
+        existingUser.users.id,
+      );
+      const accessToken = await this.refreshTokenService.generateAccessToken(
+        existingUser.users.id,
+      );
+      return { accessToken, refreshToken, user: existingUser.users };
     }
 
     const newAccount = await this.createAccount(userInfo);
 
-    return await this.lucia.createSession(newAccount.id, {});
+    const refreshToken = await this.refreshTokenService.generateRefreshToken(
+      newAccount.id,
+    );
+    const accessToken = await this.refreshTokenService.generateAccessToken(
+      newAccount.id,
+    );
+    return { accessToken, refreshToken, user: newAccount };
   }
 
   validateAuthorizationCode(
@@ -96,35 +115,6 @@ export class OAuthService {
     codeVerifier?: string,
   ): Promise<GoogleTokens> {
     return this.google.validateAuthorizationCode(code, codeVerifier!);
-  }
-
-  async handleOAuth2Callback(
-    ctx: Context,
-    provider: Provider,
-    fetchUserInfo: (accessToken: string) => Promise<UserInfo>,
-  ): Promise<{ session: Session | null; error: string | null }> {
-    const code = ctx.req.query("code");
-    const state = ctx.req.query("state");
-    const storedState = getCookie(ctx, `${provider}_oauth_state`);
-
-    if (!code || !state || !storedState || state !== storedState) {
-      return { session: null, error: "code-incorrect-or-expired" };
-    }
-
-    try {
-      const tokens = await this.validateAuthorizationCode(code, provider);
-
-      const userInfoResponse = await fetchUserInfo(tokens.accessToken);
-      const session = await this.authAccount(userInfoResponse);
-      if ("error" in session) return { session: session, error: "" };
-
-      return { session, error: "" };
-    } catch (error) {
-      if (error instanceof OAuth2RequestError) {
-        return { session: null, error: error.description };
-      }
-      return { session: null, error: "error" };
-    }
   }
 
   async getGoogleAuthorizationInfo(): Promise<GoogleAuthInfo> {

@@ -34,6 +34,14 @@ export class RefreshTokenService {
     return { refreshToken: newRefreshToken, accessToken: newAccessToken };
   }
 
+  async storeSession(userId: string, refreshToken: string) {
+    await this.refreshTokenRepository.storeRefreshToken(
+      userId,
+      refreshToken,
+      new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
+    );
+  }
+
   async generateRefreshToken(userId: string): Promise<string> {
     const payload = {
       sub: userId,
@@ -46,7 +54,7 @@ export class RefreshTokenService {
   async generateAccessToken(userId: string): Promise<string> {
     const payload = {
       sub: userId,
-      exp: Math.floor(Date.now() / 1000) + 60 * 60, //60 minutes
+      exp: Math.floor(Date.now() / 1000) + 60, //60 minutes
     };
     const accessToken = await sign(payload, config.jwt.accessSecret);
     return accessToken;

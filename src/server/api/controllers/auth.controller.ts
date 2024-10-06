@@ -22,8 +22,8 @@ import { z } from "zod";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { limiter } from "../middleware/rate-limiter.middlware";
-import { setCookie, getCookie } from "hono/cookie";
 import { RefreshTokenService } from "../services/refresh-token.service";
+import { logger } from "hono/logger";
 
 @injectable()
 export class AuthController implements Controller {
@@ -84,13 +84,19 @@ export class AuthController implements Controller {
         ),
         async (context) => {
           const { refreshToken } = context.req.valid("json");
+          log.info({ refreshToken });
+          try {
+            if (!refreshToken) {
+              return context.json("refresh-token-not-provided", 400);
+            }
+            const { accessToken, refreshToken: newRefreshToken } =
+              await this.refreshTokenService.refreshToken(refreshToken);
 
-          if (!refreshToken) {
-            return context.json("refresh-token-not-provided", 400);
+            log.info({ refreshToken, accessToken });
+            return context.json({ accessToken, refreshToken: newRefreshToken });
+          } catch (e) {
+            log.info(e);
           }
-          const { accessToken, refreshToken: newRefreshToken } =
-            await this.refreshTokenService.refreshToken(refreshToken);
-          return context.json({ accessToken, refreshToken: newRefreshToken });
         },
       )
       .get(
@@ -161,15 +167,9 @@ export class AuthController implements Controller {
             username: body.username,
             avatar: body.avatar ?? undefined,
           };
-          const { sessionCookie, user } =
+          const { refreshToken, accessToken, user } =
             await this.oAuthService.handleGoogleOAuth(oAuthData);
-          setCookie(
-            context,
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes,
-          );
-          return context.json(user);
+          return context.json({ user, accessToken, refreshToken });
         },
       )
       .post(
@@ -186,15 +186,9 @@ export class AuthController implements Controller {
             username: body.username,
             avatar: body.avatar ?? undefined,
           };
-          const { sessionCookie, user } =
+          const { refreshToken, accessToken, user } =
             await this.oAuthService.handleGoogleOAuth(oAuthData);
-          setCookie(
-            context,
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes,
-          );
-          return context.json(user);
+          return context.json({ user, accessToken, refreshToken });
         },
       );
   }

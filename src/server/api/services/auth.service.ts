@@ -69,12 +69,15 @@ export class AuthService {
         throw BadRequest("wrong-password");
       }
 
+      //if everything is good, create refresh token and access token
       const accessToken = await this.refreshTokenService.generateAccessToken(
         user.id,
       );
       const refreshToken = await this.refreshTokenService.generateRefreshToken(
         user.id,
       );
+      //store the refresh token session in the database
+      await this.refreshTokenService.storeSession(user.id, refreshToken);
 
       return { user, accessToken, refreshToken };
     } catch (e) {
