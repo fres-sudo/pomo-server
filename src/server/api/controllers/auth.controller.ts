@@ -24,6 +24,7 @@ import { join } from "path";
 import { limiter } from "../middleware/rate-limiter.middlware";
 import { RefreshTokenService } from "../services/refresh-token.service";
 import { logger } from "hono/logger";
+import { InternalError } from "../common/errors";
 
 @injectable()
 export class AuthController implements Controller {
@@ -53,7 +54,6 @@ export class AuthController implements Controller {
         limiter({ limit: 10, minutes: 60 }),
         async (context) => {
           const body = context.req.valid("json");
-          log.info({ body });
           const { user, accessToken, refreshToken } =
             await this.authService.login(body);
           return context.json({ user, accessToken, refreshToken });
@@ -84,19 +84,13 @@ export class AuthController implements Controller {
         ),
         async (context) => {
           const { refreshToken } = context.req.valid("json");
-          log.info({ refreshToken });
-          try {
-            if (!refreshToken) {
-              return context.json("refresh-token-not-provided", 400);
-            }
-            const { accessToken, refreshToken: newRefreshToken } =
-              await this.refreshTokenService.refreshToken(refreshToken);
-
-            log.info({ refreshToken, accessToken });
-            return context.json({ accessToken, refreshToken: newRefreshToken });
-          } catch (e) {
-            log.info(e);
+          if (!refreshToken) {
+            return context.json("refresh-token-not-provided", 400);
           }
+          const { accessToken, refreshToken: newRefreshToken } =
+            await this.refreshTokenService.refreshToken(refreshToken);
+
+          return context.json({ accessToken, refreshToken: newRefreshToken });
         },
       )
       .get(

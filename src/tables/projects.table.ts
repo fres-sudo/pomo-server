@@ -6,7 +6,6 @@ import { createId } from "@paralleldrive/cuid2";
 import { tasksTable } from "./tasks.table";
 import { contributorsTable } from "./contributors.table";
 
-
 export const projectsTable = pgTable("projects", {
   id: cuid2("id")
     .primaryKey()

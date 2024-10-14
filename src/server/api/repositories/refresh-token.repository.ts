@@ -5,6 +5,7 @@ import { sessionsTable } from "../../../tables";
 import { and } from "drizzle-orm/expressions";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
 import { config } from "../common/config";
+import log from "../../../utils/logger";
 
 @injectable()
 export class RefreshTokenRepository {
@@ -12,6 +13,8 @@ export class RefreshTokenRepository {
 
   async storeRefreshToken(userId: string, token: string, expiresAt: Date) {
     const body = { userId, token, expiresAt };
+    log.info("IN THE REPOSITORY");
+    log.info({ body });
     return this.db
       .insert(sessionsTable)
       .values(body)

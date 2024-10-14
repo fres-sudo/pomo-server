@@ -17,6 +17,7 @@ export class RefreshTokenService {
     const session =
       await this.refreshTokenRepository.getSessionByToken(refreshToken);
 
+    log.info({ session });
     if (!session || session.expiresAt < new Date()) {
       throw BadRequest("invalid-refresh-token");
     }

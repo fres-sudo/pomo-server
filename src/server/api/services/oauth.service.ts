@@ -1,47 +1,24 @@
 import { inject, injectable } from "tsyringe";
-import { TokensService } from "./tokens.service";
-import { LuciaProvider } from "../providers/lucia.provider";
 import { UsersRepository } from "../repositories/users.repository";
-import { HashingService } from "./hashing.service";
-import { config } from "../common/config";
-import {
-  generateCodeVerifier,
-  generateState,
-  Google,
-  Apple,
-  OAuth2RequestError,
-  type GoogleTokens,
-  AppleCredentials,
-} from "arctic";
 import type {
   GoogleAuthInfo,
   Provider,
   UserInfo,
 } from "../interfaces/oauth.intefrace";
 import { OAuthRepository } from "../repositories/oauth.repository";
-import { getCookie } from "hono/cookie";
-import type { Context } from "hono";
-import { usersTable } from "../../../tables";
-import { DatabaseProvider } from "../providers";
-import { Session } from "lucia";
 import { RefreshTokenService } from "./refresh-token.service";
+import axios from "axios";
+import { verify } from "hono/jwt";
+import { BadRequest } from "../common/errors";
 
 @injectable()
 export class OAuthService {
-  public google: Google;
-
   constructor(
     @inject(UsersRepository) private readonly usersRepository: UsersRepository,
     @inject(RefreshTokenService)
     private readonly refreshTokenService: RefreshTokenService,
     @inject(OAuthRepository) private readonly oAuthRepository: OAuthRepository,
-  ) {
-    this.google = new Google(
-      process.env.GOOGLE_CLIENT_ID ?? "",
-      process.env.GOOGLE_CLIENT_SECRET ?? "",
-      `${Bun.env.ORIGIN}/api/auth/login/google/callback`,
-    );
-  }
+  ) {}
 
   async handleGoogleOAuth(oAuthData: {
     providerId: string;
@@ -57,6 +34,31 @@ export class OAuthService {
     const accessToken = await this.refreshTokenService.generateAccessToken(
       user.id,
     );
+    await this.refreshTokenService.storeSession(user.id, refreshToken);
+    return {
+      refreshToken,
+      accessToken,
+      user,
+    };
+  }
+
+  async handleAppleOAuth(oAuthData: {
+    identityToken: string;
+    providerUserId: string;
+    email: string;
+  }) {
+    const decodedToken = await this.verifyAppleToken(oAuthData.identityToken);
+    const user = await this.oAuthRepository.createOrRetriveAppleUser(
+      decodedToken.sub,
+      decodedToken.email,
+    );
+    const refreshToken = await this.refreshTokenService.generateRefreshToken(
+      user.id,
+    );
+    const accessToken = await this.refreshTokenService.generateAccessToken(
+      user.id,
+    );
+    await this.refreshTokenService.storeSession(user.id, refreshToken);
     return {
       refreshToken,
       accessToken,
@@ -86,51 +88,15 @@ export class OAuthService {
     return newUser;
   }
 
-  async authAccount(userInfo: UserInfo) {
-    const existingUser = await this.checkForExistingUser(userInfo);
+  async verifyAppleToken(token: string) {
+    try {
+      const { data } = await axios.get("https://appleid.apple.com/auth/keys");
+      const publicKey = data.keys[0]; // You should select the right key based on the `kid`
 
-    if (existingUser) {
-      const refreshToken = await this.refreshTokenService.generateRefreshToken(
-        existingUser.users.id,
-      );
-      const accessToken = await this.refreshTokenService.generateAccessToken(
-        existingUser.users.id,
-      );
-      return { accessToken, refreshToken, user: existingUser.users };
+      const decodedToken = await verify(token, publicKey, "RS256");
+      return decodedToken;
+    } catch (err) {
+      throw BadRequest("token-verifycation-failed");
     }
-
-    const newAccount = await this.createAccount(userInfo);
-
-    const refreshToken = await this.refreshTokenService.generateRefreshToken(
-      newAccount.id,
-    );
-    const accessToken = await this.refreshTokenService.generateAccessToken(
-      newAccount.id,
-    );
-    return { accessToken, refreshToken, user: newAccount };
-  }
-
-  validateAuthorizationCode(
-    code: string,
-    codeVerifier?: string,
-  ): Promise<GoogleTokens> {
-    return this.google.validateAuthorizationCode(code, codeVerifier!);
-  }
-
-  async getGoogleAuthorizationInfo(): Promise<GoogleAuthInfo> {
-    const state = generateState();
-    const codeVerifier = generateCodeVerifier();
-
-    const url = (
-      await this.google.createAuthorizationURL(state, codeVerifier, {
-        scopes: ["profile", "email"],
-      })
-    ).toString();
-
-    return {
-      state,
-      codeVerifier,
-      url,
-    };
   }
 }

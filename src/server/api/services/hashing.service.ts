@@ -13,4 +13,3 @@ export class HashingService {
     return this.hasher.verify(hash, data);
   }
 }
-

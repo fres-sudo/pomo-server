@@ -21,6 +21,14 @@ export class OAuthRepository implements Repository {
     @inject(UsersRepository) private userRepository: UsersRepository,
   ) {}
 
+  async createOrRetriveAppleUser({
+    sub,
+    email,
+  }: {
+    sub: string;
+    email: string;
+  }) {}
+
   async createOrRetrieveUser(oAuthData: OAuthData) {
     const user = await this.userRepository.findOneByEmail(oAuthData.email);
 
@@ -51,6 +59,7 @@ export class OAuthRepository implements Repository {
 
     return newUser;
   }
+
   // creates a new oAuth account
   async create(data: CreateOAuthUser) {
     return this.db

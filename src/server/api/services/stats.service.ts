@@ -6,11 +6,9 @@ export class StatsService {
   constructor(
     @inject(StatsRepository)
     private readonly statsRepository: StatsRepository,
-  ) { }
+  ) {}
 
   async getStatsByUser(userId: string) {
     return this.statsRepository.getStatsByUser(userId);
   }
-
-
 }

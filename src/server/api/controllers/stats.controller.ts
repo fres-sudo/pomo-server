@@ -12,16 +12,22 @@ import { requireAuth } from "../middleware/auth.middleware";
 export class StatsController implements Controller {
   controller = new Hono<HonoTypes>();
 
-  constructor(@inject(StatsService) private readonly statsService: StatsService) { }
+  constructor(
+    @inject(StatsService) private readonly statsService: StatsService,
+  ) {}
 
   routes() {
-    return this.controller.get("/:userId",
+    return this.controller.get(
+      "/:userId",
       requireAuth,
       limiter({ limit: 10, minutes: 60 }),
       async (context) => {
         const userId = context.req.param("userId");
-        const stats: Stats = await this.statsService.getStatsByUser(userId ?? '');
+        const stats: Stats = await this.statsService.getStatsByUser(
+          userId ?? "",
+        );
         return context.json(stats);
-      });
+      },
+    );
   }
 }
