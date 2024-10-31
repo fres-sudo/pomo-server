@@ -9,6 +9,7 @@ import type { UserInfo } from "../interfaces/oauth.intefrace";
 import type { OAuthData } from "../../../dtos/oauth.dto";
 import log from "../../../utils/logger";
 import { UsersRepository } from "./users.repository";
+import { BadRequest } from "../common/errors";
 export type CreateOAuthUser = Pick<
   InferInsertModel<typeof oAuthTable>,
   "providerId" | "providerUserId" | "userId"
@@ -21,16 +22,41 @@ export class OAuthRepository implements Repository {
     @inject(UsersRepository) private userRepository: UsersRepository,
   ) {}
 
-  async createOrRetriveAppleUser({
-    sub,
-    email,
-  }: {
-    sub: string;
-    email: string;
-  }) {}
+  async createOrRetriveAppleUser(userAppleId: string, email: string) {
+    if (email) {
+      // first login
+      const user = await this.userRepository.findOneByEmail(email);
+      if (user) {
+        return user;
+      }
+      const newUser = await this.db
+        .insert(usersTable)
+        .values({
+          email: email,
+          username: `guest-apple-${new Date()}`,
+          password: "", // We don't need a password for OAuth users
+          verified: true, // OAuth users are considered verified
+        })
+        .returning()
+        .then(takeFirstOrThrow);
+
+      // Create the OAuth entry
+      await this.db.insert(oAuthTable).values({
+        providerId: "apple",
+        providerUserId: userAppleId,
+        userId: newUser.id,
+      });
+
+      return newUser;
+    } else {
+    }
+  }
 
   async createOrRetrieveUser(oAuthData: OAuthData) {
-    const user = await this.userRepository.findOneByEmail(oAuthData.email);
+    let user;
+    if (oAuthData.email) {
+      user = await this.userRepository.findOneByEmail(oAuthData.email);
+    }
 
     if (user) {
       // User exists, return the user data
@@ -41,7 +67,7 @@ export class OAuthRepository implements Repository {
     const newUser = await this.db
       .insert(usersTable)
       .values({
-        email: oAuthData.email,
+        email: oAuthData.email ?? "",
         username: oAuthData.username,
         avatar: oAuthData.avatar,
         password: "", // We don't need a password for OAuth users

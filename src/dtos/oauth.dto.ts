@@ -3,7 +3,7 @@ import { z } from "zod";
 export const oAuthData = z.object({
   providerId: z.string(),
   providerUserId: z.string(),
-  email: z.string().email(),
+  email: z.string().email().optional(),
   username: z.string(),
   avatar: z.string().optional(),
 });

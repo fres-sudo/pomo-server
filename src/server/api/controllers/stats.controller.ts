@@ -1,8 +1,6 @@
 import { Hono } from "hono";
 import type { HonoTypes } from "../types";
 import { inject, injectable } from "tsyringe";
-import { UserService } from "../services/user.service";
-import { createUserDto, type User } from "./../../../dtos/user.dto";
 import type { Controller } from "../interfaces/controller.interface";
 import { StatsService } from "../services/stats.service";
 import { Stats } from "../types/stats.types";

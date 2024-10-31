@@ -8,8 +8,8 @@ import type {
 import { OAuthRepository } from "../repositories/oauth.repository";
 import { RefreshTokenService } from "./refresh-token.service";
 import axios from "axios";
-import { verify } from "hono/jwt";
-import { BadRequest } from "../common/errors";
+import { BadRequest, InternalError } from "../common/errors";
+import appleSignIn from "apple-signin-auth";
 
 @injectable()
 export class OAuthService {
@@ -42,28 +42,37 @@ export class OAuthService {
     };
   }
 
-  async handleAppleOAuth(oAuthData: {
-    identityToken: string;
-    providerUserId: string;
-    email: string;
-  }) {
-    const decodedToken = await this.verifyAppleToken(oAuthData.identityToken);
+  async handleAppleOAuth(oAuthData: { identityToken: string; email: string }) {
+    const tokenResponse = await this.verifyAppleToken(oAuthData.identityToken);
+
+    const { sub: userAppleId, email } = await appleSignIn.verifyIdToken(
+      tokenResponse.id_token,
+      {
+        // If you want to handle expiration on your own, or if you want the expired tokens decoded
+        ignoreExpiration: true, // default is false
+      },
+    );
+
     const user = await this.oAuthRepository.createOrRetriveAppleUser(
-      decodedToken.sub,
-      decodedToken.email,
+      userAppleId,
+      email,
     );
-    const refreshToken = await this.refreshTokenService.generateRefreshToken(
-      user.id,
-    );
-    const accessToken = await this.refreshTokenService.generateAccessToken(
-      user.id,
-    );
-    await this.refreshTokenService.storeSession(user.id, refreshToken);
-    return {
-      refreshToken,
-      accessToken,
-      user,
-    };
+    if (user) {
+      const refreshToken = await this.refreshTokenService.generateRefreshToken(
+        user.id,
+      );
+      const accessToken = await this.refreshTokenService.generateAccessToken(
+        user.id,
+      );
+      await this.refreshTokenService.storeSession(user.id, refreshToken);
+      return {
+        refreshToken,
+        accessToken,
+        user,
+      };
+    } else {
+      throw InternalError("apple-auth-error");
+    }
   }
 
   async checkForExistingUser(userInfo: UserInfo) {
@@ -88,13 +97,22 @@ export class OAuthService {
     return newUser;
   }
 
-  async verifyAppleToken(token: string) {
-    try {
-      const { data } = await axios.get("https://appleid.apple.com/auth/keys");
-      const publicKey = data.keys[0]; // You should select the right key based on the `kid`
+  async verifyAppleToken(code: string) {
+    const clientSecret = appleSignIn.getClientSecret({
+      clientID: "com.company.app", // Apple Client ID
+      teamID: "teamID", // Apple Developer Team ID.
+      privateKey: "PRIVATE_KEY_STRING", // private key associated with your client ID. -- Or provide a `privateKeyPath` property instead.
+      keyIdentifier: "XXX", // identifier of the private key.
+    });
 
-      const decodedToken = await verify(token, publicKey, "RS256");
-      return decodedToken;
+    const options = {
+      clientID: "com.company.app", // Apple Client ID
+      redirectUri: "",
+      clientSecret: clientSecret,
+    };
+
+    try {
+      return await appleSignIn.getAuthorizationToken(code, options);
     } catch (err) {
       throw BadRequest("token-verifycation-failed");
     }

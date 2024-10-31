@@ -6,6 +6,7 @@ import { TaskService } from "../services/task.service";
 import { Task, updateTaskDto, createTaskDto } from "../../../dtos/task.dto";
 import { zValidator } from "@hono/zod-validator";
 import { requireAuth } from "../middleware/auth.middleware";
+import { parseCalendarFormat } from "../services/task.service";
 
 @injectable()
 export class TaskController implements Controller {
@@ -32,12 +33,15 @@ export class TaskController implements Controller {
       .get("/user", requireAuth, async (context) => {
         const userId = context.req.query("userId");
         const dateString = context.req.query("date");
-        const type = context.req.query("type");
+        const format = parseCalendarFormat(
+          context.req.query("format") ?? "month",
+        );
         const date = dateString ? new Date(dateString) : new Date();
-        const tasks: Task[] =
-          type == "day"
-            ? await this.taskService.getTasksOfTheDay(date, userId ?? "")
-            : await this.taskService.getTasksOfTheMonth(date, userId ?? "");
+        const tasks: Task[] = await this.taskService.getTaskByFormat(
+          date,
+          userId ?? "",
+          format,
+        );
         return context.json(tasks);
       })
       .post(
