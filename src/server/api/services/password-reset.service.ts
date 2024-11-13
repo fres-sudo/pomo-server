@@ -27,33 +27,71 @@ export class PasswordResetService {
     @inject(LuciaProvider) private readonly lucia: LuciaProvider,
   ) {}
 
-  async validate(data: ResetPasswordDto, token: string) {
+  async validateToken(token: string, email: string) {
     try {
-      if (data.password !== data.passwordConfirmation) {
-        throw BadRequest("password-donot-match");
-      }
-
       const record =
-        await this.passwordResetRepository.findValidRecordByToken(token);
+        await this.passwordResetRepository.findValidRecordByEmail(email);
 
       if (!record || !isWithinExpirationDate(record?.expiresAt)) {
         throw BadRequest("invalid-or-expired-token");
       }
-      if (record) {
-        await this.passwordResetRepository.deleteById(record.id);
+
+      const isValidToken = await this.hashingService.verify(
+        record?.hashedToken,
+        token,
+      );
+
+      if (!isValidToken) {
+        throw BadRequest("invalid-or-expired-token");
       }
 
-      await this.lucia.invalidateUserSessions(record.userId);
+      return { status: "success" };
+    } catch (e) {
+      log.error(e);
+      if (e instanceof HTTPException) {
+        throw e;
+      }
+      throw InternalError("error-veryfing-token");
+    }
+  }
 
-      const hashedPassword = await this.hashingService.hash(data.password);
+  async resetPassword(token: string, data: ResetPasswordDto) {
+    try {
+      const record = await this.passwordResetRepository.findValidRecordByEmail(
+        data.email,
+      );
+      if (!record || !isWithinExpirationDate(record?.expiresAt)) {
+        throw BadRequest("invalid-or-expired-token");
+      }
 
-      await this.usersRepository.update(record.userId, {
+      const isValidToken = await this.hashingService.verify(
+        record?.hashedToken,
+        token,
+      );
+
+      if (!isValidToken) {
+        throw BadRequest("invalid-or-expired-token");
+      }
+      const user = await this.usersRepository.findOneByEmail(data.email);
+
+      if (!user) {
+        throw BadRequest("no-user-with-this-email");
+      }
+
+      if (data.newPassword !== data.confirmNewPassword) {
+        throw BadRequest("password-donot-match");
+      }
+
+      await this.passwordResetRepository.deleteById(record.id);
+      await this.lucia.invalidateUserSessions(user.id);
+
+      const hashedPassword = await this.hashingService.hash(data.newPassword);
+
+      await this.usersRepository.update(user.id, {
         password: hashedPassword,
       });
-
-      const session = await this.lucia.createSession(record.userId, {});
-      return this.lucia.createSessionCookie(session.id);
     } catch (e) {
+      log.error(e);
       if (e instanceof HTTPException) {
         throw e;
       }
@@ -63,20 +101,25 @@ export class PasswordResetService {
 
   async createPasswordResetToken(data: ResetPasswordEmailDto) {
     try {
-      // generate a token and expiry
+      // generate a token, expiry and hash
       const { token, expiry, hashedToken } =
-        await this.tokensService.generateTokenWithExpiryAndHash(15, "m");
+        await this.tokensService.generateTokenWithExpiryAndHash(
+          6,
+          15,
+          "m",
+          "NUMBER",
+        );
       const user = await this.usersRepository.findOneByEmail(data.email);
 
       if (!user) {
         throw BadRequest("no-user-with-this-email");
       }
-
+      //if there is an existing record delete it
       await this.findRecordAndDelete(user.id);
       // create a new email verification record
       await this.passwordResetRepository.create({
-        userId: user.id,
-        hashedToken: token,
+        email: user.email,
+        hashedToken: hashedToken,
         expiresAt: expiry,
       });
 
@@ -85,7 +128,7 @@ export class PasswordResetService {
       this.mailerService.sendPasswordResetEmail({
         to: user.email,
         props: {
-          link: `${Bun.env.ORIGIN}/resetpassword/${token}`,
+          link: token,
         },
       });
 
@@ -96,7 +139,7 @@ export class PasswordResetService {
         props: null,
       });
     } catch (e) {
-      log.info(e);
+      log.error(e);
       if (e instanceof HTTPException) {
         throw e;
       }
@@ -104,9 +147,9 @@ export class PasswordResetService {
     }
   }
 
-  async findRecordAndDelete(userId: string) {
+  async findRecordAndDelete(email: string) {
     const existingRecord =
-      await this.passwordResetRepository.findValidRecord(userId);
+      await this.passwordResetRepository.findValidRecordByEmail(email);
     if (existingRecord) {
       await this.passwordResetRepository.deleteById(existingRecord.id);
     }

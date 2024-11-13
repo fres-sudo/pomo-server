@@ -3,13 +3,29 @@ import { LuciaProvider } from "../providers/lucia.provider";
 import { TaskRepository, UpdateTaskDto } from "../repositories/task.repository";
 import { CreateTaskDto } from "../../../dtos/task.dto";
 
+enum CalendarFormat {
+  month,
+  twoWeeks,
+  week,
+}
+
+export function parseCalendarFormat(format: string) {
+  if (format === "twoWeeks") {
+    return CalendarFormat.twoWeeks;
+  }
+  if (format === "week") {
+    return CalendarFormat.week;
+  }
+  return CalendarFormat.month;
+}
+
 @injectable()
 export class TaskService {
   constructor(
     @inject(LuciaProvider) private readonly lucia: LuciaProvider,
     @inject(TaskRepository)
     private readonly taskRepository: TaskRepository,
-  ) { }
+  ) {}
 
   async getAllTasks() {
     return this.taskRepository.findAll();
@@ -19,12 +35,17 @@ export class TaskService {
     return this.taskRepository.findAllByUser(id);
   }
 
-  async getTasksOfTheMonth(date: Date, userId: string) {
-    return this.taskRepository.findAllByMonth(date, userId)
-  }
-
-  async getTasksOfTheDay(date: Date, userId: string) {
-    return this.taskRepository.findAllByDay(date, userId)
+  async getTaskByFormat(date: Date, userId: string, format: CalendarFormat) {
+    if (format === CalendarFormat.month) {
+      return this.taskRepository.findAllByMonth(date, userId);
+    }
+    if (format === CalendarFormat.twoWeeks) {
+      return this.taskRepository.findAllByTwoWeeks(date, userId);
+    }
+    if (format === CalendarFormat.week) {
+      return this.taskRepository.findAllByWeek(date, userId);
+    }
+    return this.taskRepository.findAllByMonth(date, userId);
   }
 
   async getAllByProject(projectId: string) {

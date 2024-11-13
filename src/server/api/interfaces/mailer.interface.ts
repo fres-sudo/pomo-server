@@ -1,3 +1,3 @@
 interface INotifier {
-	sendEmail(): any;
+  sendEmail(): any;
 }

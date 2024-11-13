@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /* -------------------------------------------------------------------------- */
 /*                                     DTO                                    */
@@ -19,6 +19,6 @@ ensure that the correct data is being passed around.
 /* -------------------------------------------------------------------------- */
 
 export const verifyEmailDto = z.object({
-	token: z.string()
+  token: z.string(),
 });
 export type VerifyEmailDto = z.infer<typeof verifyEmailDto>;

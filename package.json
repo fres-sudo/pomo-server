@@ -11,7 +11,9 @@
     "test": "npm run test:integration && npm run test:unit",
     "initialize": "bun install && docker-compose up --no-recreate -d && bun db:migrate",
     "docker:up": "docker-compose up -d",
+    "docker:logs": "docker logs -f --details pomo-backend",
     "docker:build": "docker-compose up -d --build",
+    "docker:cli": "docker exec -t pomo-db sh",
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write ."
   },
@@ -38,7 +40,10 @@
     "@lucia-auth/adapter-drizzle": "^1.0.7",
     "@node-rs/argon2": "^1.8.3",
     "@paralleldrive/cuid2": "^2.2.2",
+    "@types/jsonwebtoken": "^9.0.7",
+    "apple-signin-auth": "^1.7.7",
     "arctic": "^1.9.1",
+    "axios": "^1.7.7",
     "drizzle-kit": "^0.21.4",
     "drizzle-orm": "^0.30.10",
     "drizzle-zod": "^0.5.1",
@@ -46,6 +51,7 @@
     "hono": "^4.4.7",
     "hono-rate-limiter": "^0.3.0",
     "ioredis": "^5.4.1",
+    "jsonwebtoken": "^9.0.2",
     "lucia": "^3.2.0",
     "nodemailer": "^6.9.14",
     "oslo": "^1.2.0",
@@ -60,7 +66,6 @@
     "tslib": "^2.6.3",
     "tsyringe": "^4.8.0",
     "typescript": "^5.5.2",
-    "uploadthing": "^6.13.3",
     "zod": "^3.23.8"
   }
 }

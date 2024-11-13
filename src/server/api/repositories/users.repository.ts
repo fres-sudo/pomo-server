@@ -27,7 +27,7 @@ export type UpdateUser = Partial<CreateUser>;
 
 @injectable()
 export class UsersRepository implements Repository {
-  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) { }
+  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
 
   async findAll(): Promise<User[]> {
     return this.db.query.usersTable.findMany();
@@ -46,9 +46,11 @@ export class UsersRepository implements Repository {
   }
 
   async findOneByEmail(email: string) {
-    return this.db.query.usersTable.findFirst({
+    const user = this.db.query.usersTable.findFirst({
       where: eq(usersTable.email, email),
     });
+    if (!user) throw Error("user-not-found");
+    return user;
   }
 
   async findOneByUsername(username: string) {
@@ -56,7 +58,6 @@ export class UsersRepository implements Repository {
       where: eq(usersTable.username, username),
     });
   }
-
 
   async create(data: CreateUser) {
     return this.db
@@ -73,6 +74,10 @@ export class UsersRepository implements Repository {
       .where(eq(usersTable.id, id))
       .returning()
       .then(takeFirstOrThrow);
+  }
+
+  async delete(userId: string) {
+    return this.db.delete(usersTable).where(eq(usersTable.id, userId));
   }
 
   trxHost(trx: DatabaseProvider) {

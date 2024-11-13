@@ -1,11 +1,10 @@
-
 export type Stats = {
-  totalTasksToday: number,
-  totalTasksYesterday: number,
-  totalTasksAll: number,
+  totalTasksToday: number;
+  totalTasksYesterday: number;
+  totalTasksAll: number;
 
-  completedTasksOfTheWeek: number[],
-  uncompletedTasksOfTheWeek: number[],
+  completedTasksOfTheWeek: number[];
+  uncompletedTasksOfTheWeek: number[];
 
-  completionPercentage: number,
-}
+  completionPercentage: number;
+};

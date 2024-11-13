@@ -1,8 +1,7 @@
 import { Scrypt } from "oslo/password";
 
-
 export async function hash(value: string) {
-  const scrypt = new Scrypt()
+  const scrypt = new Scrypt();
   return scrypt.hash(value);
 }
 

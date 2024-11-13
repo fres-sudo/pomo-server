@@ -5,12 +5,13 @@ import { eq, sql, and, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
 import { tasksTable } from "./../../../tables";
 import { CreateTaskDto, Task } from "../../../dtos/task.dto";
+import { between } from "drizzle-orm";
 
 export type UpdateTaskDto = Partial<CreateTaskDto>;
 
 @injectable()
 export class TaskRepository implements Repository {
-  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) { }
+  constructor(@inject(DatabaseProvider) private db: DatabaseProvider) {}
 
   async findAll(): Promise<Task[]> {
     return this.db.query.tasksTable.findMany();
@@ -19,34 +20,59 @@ export class TaskRepository implements Repository {
   async findAllByUser(userId: string): Promise<Task[]> {
     return this.db.query.tasksTable.findMany({
       where: eq(tasksTable.userId, userId),
-    })
+    });
   }
 
   async findAllByDay(date: Date, userId: string): Promise<Task[]> {
     return this.db.query.tasksTable.findMany({
-      where: and(eq(tasksTable.userId, userId), this.isSameDay(tasksTable.dueDate, date)),
-    })
+      where: and(
+        eq(tasksTable.userId, userId),
+        this.isSameDay(tasksTable.dueDate, date),
+      ),
+    });
+  }
+
+  async findAllByTwoWeeks(date: Date, userId: string): Promise<Task[]> {
+    const endDate = new Date(date);
+    endDate.setDate(date.getDate() + 14); // Adds 14 days (2 weeks)
+
+    return this.db.query.tasksTable.findMany({
+      where: and(
+        eq(tasksTable.userId, userId),
+        between(tasksTable.dueDate, date, endDate), // Finds tasks between the start and end date
+      ),
+    });
+  }
+
+  async findAllByWeek(date: Date, userId: string): Promise<Task[]> {
+    const endDate = new Date(date);
+    endDate.setDate(date.getDate() + 7); // Adds 7 days (1 week)
+
+    return this.db.query.tasksTable.findMany({
+      where: and(
+        eq(tasksTable.userId, userId),
+        between(tasksTable.dueDate, date, endDate), // Finds tasks between the start and end date
+      ),
+    });
   }
 
   // Helper function to compare just the day part of dates
   isSameDay(column: any, date: Date) {
-    // Depending on your SQL dialect, adjust the date function. Example for SQL:
-    return sql`DATE(${column}) = DATE(${date.toISOString().split('T')[0]})`; // Strips time part
+    return sql`DATE(${column}) = DATE(${date.toISOString().split("T")[0]})`; // Strips time part
   }
-  // Helper function for comparing just the month and year in PostgreSQL
-  isSameMonth(column: any, date: Date) {
-    // Truncate both column and input date to the first day of the month
-    const truncatedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-    return sql`DATE_TRUNC('month', ${column}) = DATE_TRUNC('month', ${truncatedDate}::date)`;
-  }  // The main function using the helper for the query
+
   async findAllByMonth(date: Date, userId: string): Promise<Task[]> {
+    const endDate = new Date(date);
+    endDate.setDate(date.getDate() + 30); // Adds 30 days (1 month)
+
     return this.db.query.tasksTable.findMany({
       where: and(
         eq(tasksTable.userId, userId),
-        this.isSameMonth(tasksTable.dueDate, date) // Use the helper function here
+        between(tasksTable.dueDate, date, endDate), // Finds tasks between the start and end date
       ),
     });
   }
+
   async findAllByProject(projectId: string): Promise<Task[]> {
     return this.db
       .select()

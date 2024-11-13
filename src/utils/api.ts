@@ -3,14 +3,17 @@ import type { ClientResponse } from "hono/client";
 import { ZodObject } from "zod";
 
 export async function parseApiResponse<T>(response: ClientResponse<T>) {
-  if (response.status === 204 || response.headers.get('Content-Length') === '0') {
+  if (
+    response.status === 204 ||
+    response.headers.get("Content-Length") === "0"
+  ) {
     return response.ok
       ? { data: null, error: null, response }
-      : { data: null, error: 'An unknown error has occured', response };
+      : { data: null, error: "An unknown error has occured", response };
   }
 
   if (response.ok) {
-    const data = await response.json() as T;
+    const data = (await response.json()) as T;
 
     return { data, error: null, status: response.status };
   }
@@ -25,6 +28,3 @@ export async function parseApiResponse<T>(response: ClientResponse<T>) {
   }
   return { data: null, error, response };
 }
-
-
-

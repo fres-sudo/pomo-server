@@ -1,6 +1,6 @@
 {
-  "id": "dd632ca9-9a9d-437c-b59c-69da04b205c3",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "61b04201-8210-42f6-a25f-c18688e4e5c8",
+  "prevId": "b34e8317-88ca-4609-a00c-d82311c70f32",
   "version": "6",
   "dialect": "postgresql",
   "tables": {
@@ -180,8 +180,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
+        "email": {
+          "name": "email",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -209,22 +209,22 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "passwordResetTable_user_id_users_id_fk": {
-          "name": "passwordResetTable_user_id_users_id_fk",
+        "passwordResetTable_email_users_email_fk": {
+          "name": "passwordResetTable_email_users_email_fk",
           "tableFrom": "passwordResetTable",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": ["email"],
+          "columnsTo": ["email"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "passwordResetTable_user_id_unique": {
-          "name": "passwordResetTable_user_id_unique",
+        "passwordResetTable_email_unique": {
+          "name": "passwordResetTable_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id"]
+          "columns": ["email"]
         }
       }
     },
@@ -390,6 +390,20 @@
           "primaryKey": false,
           "notNull": false
         },
+        "dueDate": {
+          "name": "dueDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "highPriority": {
+          "name": "highPriority",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "projectId": {
           "name": "projectId",
           "type": "text",
@@ -411,7 +425,7 @@
           "tableTo": "projects",
           "columnsFrom": ["projectId"],
           "columnsTo": ["id"],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "tasks_user_id_users_id_fk": {
@@ -437,15 +451,9 @@
           "primaryKey": true,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "surname": {
-          "name": "surname",
-          "type": "varchar(100)",
+        "username": {
+          "name": "username",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -493,6 +501,11 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": ["username"]
+        },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,

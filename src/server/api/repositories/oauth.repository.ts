@@ -9,73 +9,108 @@ import type { UserInfo } from "../interfaces/oauth.intefrace";
 import type { OAuthData } from "../../../dtos/oauth.dto";
 import log from "../../../utils/logger";
 import { UsersRepository } from "./users.repository";
+import { BadRequest } from "../common/errors";
 export type CreateOAuthUser = Pick<
-	InferInsertModel<typeof oAuthTable>,
-	"providerId" | "providerUserId" | "userId"
+  InferInsertModel<typeof oAuthTable>,
+  "providerId" | "providerUserId" | "userId"
 >;
 
 @injectable()
 export class OAuthRepository implements Repository {
-	constructor(
-		@inject(DatabaseProvider) private readonly db: DatabaseProvider,
-		@inject(UsersRepository) private userRepository: UsersRepository
-	) {}
+  constructor(
+    @inject(DatabaseProvider) private readonly db: DatabaseProvider,
+    @inject(UsersRepository) private userRepository: UsersRepository,
+  ) {}
 
-	async createOrRetrieveUser(oAuthData: OAuthData) {
-		const user = await this.userRepository.findOneByEmail(oAuthData.email);
+  async createOrRetriveAppleUser(userAppleId: string, email: string) {
+    if (email) {
+      // first login
+      const user = await this.userRepository.findOneByEmail(email);
+      if (user) {
+        return user;
+      }
+      const newUser = await this.db
+        .insert(usersTable)
+        .values({
+          email: email,
+          username: `guest-apple-${new Date()}`,
+          password: "", // We don't need a password for OAuth users
+          verified: true, // OAuth users are considered verified
+        })
+        .returning()
+        .then(takeFirstOrThrow);
 
-		if (user) {
-			// User exists, return the user data
-			return user;
-		}
+      // Create the OAuth entry
+      await this.db.insert(oAuthTable).values({
+        providerId: "apple",
+        providerUserId: userAppleId,
+        userId: newUser.id,
+      });
 
-		// User doesn't exist, create a new user
-		const newUser = await this.db
-			.insert(usersTable)
-			.values({
-				email: oAuthData.email,
-				username: oAuthData.username,
-				avatar: oAuthData.avatar,
-				password: "", // We don't need a password for OAuth users
-				verified: true, // OAuth users are considered verified
-			})
-			.returning()
-			.then(takeFirstOrThrow);
+      return newUser;
+    } else {
+    }
+  }
 
-		// Create the OAuth entry
-		await this.db.insert(oAuthTable).values({
-			providerId: oAuthData.providerId,
-			providerUserId: oAuthData.providerUserId,
-			userId: newUser.id,
-		});
+  async createOrRetrieveUser(oAuthData: OAuthData) {
+    let user;
+    if (oAuthData.email) {
+      user = await this.userRepository.findOneByEmail(oAuthData.email);
+    }
 
-		return newUser;
-	}
-	// creates a new oAuth account
-	async create(data: CreateOAuthUser) {
-		return this.db
-			.insert(oAuthTable)
-			.values(data)
-			.returning()
-			.then(takeFirstOrThrow);
-	}
+    if (user) {
+      // User exists, return the user data
+      return user;
+    }
 
-	// finds a valid record in oAuth table
-	async findValidRecord(userInfo: UserInfo) {
-		return this.db
-			.select()
-			.from(oAuthTable)
-			.where(
-				and(
-					eq(oAuthTable.providerId, userInfo.provider),
-					eq(oAuthTable.providerUserId, userInfo.id)
-				)
-			)
-			.innerJoin(usersTable, eq(usersTable.id, oAuthTable.userId))
-			.then(takeFirst);
-	}
+    // User doesn't exist, create a new user
+    const newUser = await this.db
+      .insert(usersTable)
+      .values({
+        email: oAuthData.email ?? "",
+        username: oAuthData.username,
+        avatar: oAuthData.avatar,
+        password: "", // We don't need a password for OAuth users
+        verified: true, // OAuth users are considered verified
+      })
+      .returning()
+      .then(takeFirstOrThrow);
 
-	trxHost(trx: DatabaseProvider) {
-		return new OAuthRepository(trx);
-	}
+    // Create the OAuth entry
+    await this.db.insert(oAuthTable).values({
+      providerId: oAuthData.providerId,
+      providerUserId: oAuthData.providerUserId,
+      userId: newUser.id,
+    });
+
+    return newUser;
+  }
+
+  // creates a new oAuth account
+  async create(data: CreateOAuthUser) {
+    return this.db
+      .insert(oAuthTable)
+      .values(data)
+      .returning()
+      .then(takeFirstOrThrow);
+  }
+
+  // finds a valid record in oAuth table
+  async findValidRecord(userInfo: UserInfo) {
+    return this.db
+      .select()
+      .from(oAuthTable)
+      .where(
+        and(
+          eq(oAuthTable.providerId, userInfo.provider),
+          eq(oAuthTable.providerUserId, userInfo.id),
+        ),
+      )
+      .innerJoin(usersTable, eq(usersTable.id, oAuthTable.userId))
+      .then(takeFirst);
+  }
+
+  trxHost(trx: DatabaseProvider) {
+    return new OAuthRepository(trx, this.userRepository);
+  }
 }

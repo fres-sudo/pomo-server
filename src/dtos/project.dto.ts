@@ -3,15 +3,17 @@ import { projectsTable } from "../tables";
 import { z } from "zod";
 
 export const projectDto = createSelectSchema(projectsTable);
-export const createProjectDto = createInsertSchema(projectsTable).omit({
-  id: true,
-  endDate: true,
-  startDate: true,
-  createdAt: true,
-}).extend({
-  startDate: z.coerce.date(),
-  endDate: z.coerce.date(),
-});
+export const createProjectDto = createInsertSchema(projectsTable)
+  .omit({
+    id: true,
+    endDate: true,
+    startDate: true,
+    createdAt: true,
+  })
+  .extend({
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+  });
 
 export const updateProjectDto = createProjectDto.partial();
 

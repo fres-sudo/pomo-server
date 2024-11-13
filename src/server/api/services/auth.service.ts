@@ -12,6 +12,10 @@ import { EmailVerificationsService } from "./email-verifications.service";
 import { HTTPException } from "hono/http-exception";
 import { EmailVerificationsRepository } from "../repositories/email-verifications.repository";
 import log from "../../../utils/logger";
+import { jwt, sign, verify } from "hono/jwt";
+import { RefreshTokenRepository } from "../repositories/refresh-token.repository";
+import { RefreshTokenService } from "./refresh-token.service";
+import { JWTPayload } from "hono/utils/jwt/types";
 
 @injectable()
 export class AuthService {
@@ -25,6 +29,8 @@ export class AuthService {
     private readonly emailVerificationToken: EmailVerificationsService,
     @inject(UsersRepository) private readonly usersRepository: UsersRepository,
     @inject(HashingService) private readonly hashingService: HashingService,
+    @inject(RefreshTokenService)
+    private readonly refreshTokenService: RefreshTokenService,
   ) {}
 
   async login(data: LoginDto) {
@@ -34,6 +40,24 @@ export class AuthService {
         throw BadRequest("invalid-email");
       }
       if (!user.verified) {
+        const emailVerification =
+          await this.emailVerificationRepository.findValidRecord(user.id);
+
+        // If the user has not a pending email verification
+        if (!emailVerification) {
+          await this.handleExpiredTokenAndResendVerification({
+            id: user.id,
+            email: user.email,
+          });
+        } else {
+          //If the user has pending email verification but they are expired
+          if (new Date() > new Date(emailVerification.expiresAt)) {
+            await this.handleExpiredTokenAndResendVerification({
+              id: user.id,
+              email: user.email,
+            });
+          }
+        }
         throw BadRequest("email-not-verified");
       }
       const hashedPassword = await this.hashingService.verify(
@@ -44,11 +68,18 @@ export class AuthService {
       if (!hashedPassword) {
         throw BadRequest("wrong-password");
       }
-      const session = await this.lucia.createSession(user.id, {});
-      return {
-        sessionCookie: this.lucia.createSessionCookie(session.id),
-        user,
-      };
+
+      //if everything is good, create refresh token and access token
+      const accessToken = await this.refreshTokenService.generateAccessToken(
+        user.id,
+      );
+      const refreshToken = await this.refreshTokenService.generateRefreshToken(
+        user.id,
+      );
+      //store the refresh token session in the database
+      await this.refreshTokenService.storeSession(user.id, refreshToken);
+
+      return { user, accessToken, refreshToken };
     } catch (e) {
       log.error(e);
       if (e instanceof HTTPException) {
@@ -86,22 +117,9 @@ export class AuthService {
       data.password = hashedPassword;
       const newUser = await this.usersRepository.create(data);
 
-      const { token, expiry, hashedToken } =
-        await this.tokensService.generateTokenWithExpiryAndHash(15, "m");
-
-      // create a new email verification record
-      await this.emailVerificationRepository.create({
-        requestedEmail: newUser.email,
-        userId: newUser.id,
-        hashedToken,
-        expiresAt: expiry,
-      });
-
-      this.mailerService.sendEmailVerificationToken({
-        to: data.email,
-        props: {
-          link: `${config.api.origin}/api/auth/verify/${newUser.id}/${token}`,
-        },
+      this.handleExpiredTokenAndResendVerification({
+        id: newUser.id,
+        email: newUser.email,
       });
 
       return newUser;
@@ -114,7 +132,43 @@ export class AuthService {
     }
   }
 
-  async logout(sessionId: string) {
-    return this.lucia.invalidateSession(sessionId);
+  async logout(refreshToken: string) {
+    try {
+      // Remove the refresh token from the database
+      await this.refreshTokenService.removeRefreshToken(refreshToken);
+    } catch (e) {
+      log.error(e);
+      throw InternalError("error-logout");
+    }
+  }
+
+  // Private function to handle token generation, update, and email sending
+  private async handleExpiredTokenAndResendVerification(user: {
+    id: string;
+    email: string;
+  }) {
+    const { token, expiry, hashedToken } =
+      await this.tokensService.generateTokenWithExpiryAndHash(
+        15,
+        30,
+        "m",
+        "STRING",
+      );
+
+    // Update the email verification record with the new token
+    await this.emailVerificationRepository.create({
+      userId: user.id,
+      requestedEmail: user.email,
+      hashedToken,
+      expiresAt: expiry,
+    });
+
+    // Resend the email verification link
+    this.mailerService.sendEmailVerificationToken({
+      to: user.email,
+      props: {
+        link: `${config.api.origin}/api/auth/verify/${user.id}/${token}`,
+      },
+    });
   }
 }

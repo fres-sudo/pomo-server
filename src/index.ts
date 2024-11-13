@@ -18,16 +18,19 @@ import { usersTable } from "./tables";
 import { StatsController } from "./server/api/controllers/stats.controller";
 import { readFileSync } from "fs";
 import { join } from "path";
-
+import { logger } from "hono/logger";
 /* ----------------------------------- Api ---------------------------------- */
+
 const app = new Hono().basePath("/api");
 
 /* --------------------------- Global Middlewares --------------------------- */
 
 app.use("*", cors({ origin: "*" })); // Allow CORS for all origins
 app.use(validateAuthSession);
+app.use(logger());
 
 /* --------------------------------- Routes --------------------------------- */
+
 const authRoutes = container.resolve(AuthController).routes();
 const userRoutes = container.resolve(UserController).routes();
 const taskRoutes = container.resolve(TaskController).routes();
@@ -59,10 +62,5 @@ Bun.serve({
   fetch: app.fetch,
   port: 9000,
 });
-
-log.info("Bun is running 🐳");
-
-/* -------------------------------------------------------------------------- *
-/*                                   Exports                                  */
-/* -------------------------------------------------------------------------- */
+/* -----------------------------------Exports--------------------------------------- */
 export { app };

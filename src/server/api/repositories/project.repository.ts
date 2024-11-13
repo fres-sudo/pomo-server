@@ -23,6 +23,9 @@ export class ProjectRepository implements Repository {
   async findOneById(id: string) {
     return this.db.query.projectsTable.findFirst({
       where: eq(projectsTable.id, id),
+      with: {
+        tasks: true,
+      },
     });
   }
 
@@ -50,14 +53,15 @@ export class ProjectRepository implements Repository {
   }
 
   async update(id: string, data: UpdateProjectDto) {
-    return this.db
+    await this.db
       .update(projectsTable)
       .set(data)
       .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);
-  }
 
+    return this.findOneById(id);
+  }
   async delete(id: string) {
     return this.db
       .delete(projectsTable)

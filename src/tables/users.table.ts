@@ -29,8 +29,8 @@ export const usersRelations = relations(usersTable, ({ many, one }) => ({
     references: [emailVerificationsTable.userId],
   }),
   passwordResetTokens: one(passwordResetTable, {
-    fields: [usersTable.id],
-    references: [passwordResetTable.userId],
+    fields: [usersTable.email],
+    references: [passwordResetTable.email],
   }),
   oAuths: one(oAuthTable, {
     fields: [usersTable.id],
