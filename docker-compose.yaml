@@ -1,5 +1,6 @@
 services:
   app:
+    image: ghcr.io/fres-sudo/pomo-server:latest
     container_name: pomo-backend
     build:
       dockerfile: Dockerfile
