@@ -3,6 +3,7 @@ services:
     image: ghcr.io/fres-sudo/pomo-server:latest
     container_name: pomo-backend
     build:
+      context: .
       dockerfile: Dockerfile
     depends_on:
       - postgres
