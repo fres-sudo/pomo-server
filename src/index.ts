@@ -4,18 +4,18 @@ import { hc } from "hono/client";
 import { container } from "tsyringe";
 import { cors } from "hono/cors";
 import log from "./utils/logger";
-import { AuthController } from "./server/api/controllers/auth.controller";
-import { UserController } from "./server/api/controllers/user.controller";
+import { AuthController } from "./controllers/auth.controller";
+import { UserController } from "./controllers/user.controller";
 import {
-  validateAuthSession,
-  verifyOrigin,
-} from "./server/api/middleware/auth.middleware";
+	validateAuthSession,
+	verifyOrigin,
+} from "./middleware/auth.middleware";
 import "reflect-metadata";
-import { TaskController } from "./server/api/controllers/task.controller";
-import { ProjectController } from "./server/api/controllers/project.controller";
-import { db } from "./server/api/infrastructure/database";
+import { TaskController } from "./controllers/task.controller";
+import { ProjectController } from "./controllers/project.controller";
+import { db } from "./infrastructure/database";
 import { usersTable } from "./tables";
-import { StatsController } from "./server/api/controllers/stats.controller";
+import { StatsController } from "./controllers/stats.controller";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { logger } from "hono/logger";
@@ -38,29 +38,29 @@ const projectRoutes = container.resolve(ProjectController).routes();
 const statsRoutes = container.resolve(StatsController).routes();
 
 app
-  .route("/auth", authRoutes)
-  .route("/users", userRoutes)
-  .route("/tasks", taskRoutes)
-  .route("/projects", projectRoutes)
-  .route("/stats", statsRoutes);
+	.route("/auth", authRoutes)
+	.route("/users", userRoutes)
+	.route("/tasks", taskRoutes)
+	.route("/projects", projectRoutes)
+	.route("/stats", statsRoutes);
 
 // Serve the 404 page for any unmatched routes
 app.notFound((context) => {
-  const htmlPath = join(__dirname, "/ui/404.html");
-  const htmlContent = readFileSync(htmlPath, "utf-8");
-  return context.html(htmlContent);
+	const htmlPath = join(__dirname, "/ui/404.html");
+	const htmlContent = readFileSync(htmlPath, "utf-8");
+	return context.html(htmlContent);
 });
 
 app.get("/", async (c) => {
-  log.info("app logged 💥");
-  const users = await db.select().from(usersTable);
-  return c.json(users);
-  //return c.text("--------- app is fine, no worries 🐳 --------- ");
+	log.info("app logged 💥");
+	const users = await db.select().from(usersTable);
+	return c.json(users);
+	//return c.text("--------- app is fine, no worries 🐳 --------- ");
 });
 
 Bun.serve({
-  fetch: app.fetch,
-  port: 9000,
+	fetch: app.fetch,
+	port: 9000,
 });
 /* -----------------------------------Exports--------------------------------------- */
 export { app };
