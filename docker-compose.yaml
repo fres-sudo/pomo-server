@@ -28,17 +28,6 @@ services:
     networks:
       - app-network
 
-  redis:
-    container_name: pomo-redis
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: ["redis-server", "--bind", "redis", "--port", "6379"]
-    networks:
-      - app-network
-
 networks:
   app-network:
     driver: bridge
