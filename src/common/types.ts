@@ -9,6 +9,7 @@ export interface Config {
 
 interface ApiConfig {
   origin: string;
+  port: string | number;
 }
 
 interface StorageConfig {

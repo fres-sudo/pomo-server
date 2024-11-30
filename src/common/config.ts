@@ -3,6 +3,7 @@ import type { Config } from "./types";
 export const config: Config = {
   isProduction: process.env.NODE_ENV === "production",
   api: {
+    port: process.env.PORT ?? 9000,
     origin: process.env.ORIGIN ?? "",
   },
   storage: {
