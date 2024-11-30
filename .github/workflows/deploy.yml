@@ -39,7 +39,7 @@ jobs:
 
       - name: Pull and Deploy on VPS
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} /bin/bash << 'EOF'
           cd ${{ secrets.WORK_DIR }}
           docker compose pull
           docker compose up -d
