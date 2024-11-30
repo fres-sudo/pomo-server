@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to GHCR
+name: Build, Push, and Deploy
 
 on:
   push:
@@ -6,13 +6,14 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  publish:
+    name: Publish Docker Image to GHCR
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write # Required to publish to GHCR
+      packages: write
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Log in to GitHub Container Registry
@@ -23,3 +24,23 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/pomo-server:latest
+
+  deploy:
+    needs: publish
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Pull and Deploy on VPS
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd ${{ secrets.WORK_DIR }}
+          docker compose pull
+          docker compose up -d
+          EOF
