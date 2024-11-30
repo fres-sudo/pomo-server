@@ -14,6 +14,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { logger } from "hono/logger";
 import { config } from "./common/config";
+import { sentry } from "@hono/sentry";
 /* ----------------------------------- Api ---------------------------------- */
 
 const app = new Hono().basePath("/api");
@@ -22,7 +23,11 @@ const app = new Hono().basePath("/api");
 
 app.use("*", cors({ origin: "*" })); // Allow CORS for all origins
 app.use(validateAuthSession);
-app.use(logger());
+app.use(
+  sentry({
+    dsn: config.sentry.dsn,
+  }),
+);
 
 /* --------------------------------- Routes --------------------------------- */
 

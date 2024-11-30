@@ -25,4 +25,7 @@ export const config: Config = {
     accessExpiresIn: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days
     refreshExpiresIn: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days
   },
+  sentry: {
+    dsn: process.env.SENTRY_DSN ?? "",
+  },
 };
