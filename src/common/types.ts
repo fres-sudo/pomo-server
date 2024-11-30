@@ -5,6 +5,7 @@ export interface Config {
   redis: RedisConfig;
   postgres: PostgresConfig;
   jwt: JwtConfig;
+  sentry: Sentry;
 }
 
 interface ApiConfig {
@@ -33,4 +34,8 @@ interface JwtConfig {
   refreshSecret: string;
   accessExpiresIn: number;
   refreshExpiresIn: number;
+}
+
+interface Sentry {
+  dsn: string;
 }
