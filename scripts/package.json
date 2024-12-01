@@ -1,9 +1,0 @@
-{
-  "name": "drizzle-migration",
-  "version": "0.1.0",
-  "dependencies": {
-    "drizzle-orm": "^0.29.4",
-    "better-sqlite3": "^9.4.3",
-    "std-env": "^3.7.0"
-  }
-}

@@ -1,5 +1,7 @@
 import type { Config } from "drizzle-kit";
-const url = "postgresql://postgres:postgres@postgres:5432/postgres";
+import { config } from "./src/common/config";
+
+const url = config.postgres.url;
 
 export default {
   out: "./src/server/api/infrastructure/database/migrations",
