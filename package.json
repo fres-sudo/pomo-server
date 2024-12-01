@@ -8,14 +8,11 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio --verbose",
     "dev": "bun run --hot src/index.ts",
-    "test": "npm run test:integration && npm run test:unit",
     "initialize": "bun install && docker-compose up --no-recreate -d && bun db:migrate",
     "docker:up": "docker-compose up -d",
     "docker:logs": "docker logs -f --details pomo-backend",
     "docker:build": "docker-compose up -d --build",
-    "docker:cli": "docker exec -t pomo-db sh",
-    "lint": "prettier --check . && eslint .",
-    "format": "prettier --write ."
+    "docker:cli": "docker exec -t pomo-db sh"
   },
   "devDependencies": {
     "@types/bun": "latest",
