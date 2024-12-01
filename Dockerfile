@@ -6,13 +6,13 @@ WORKDIR /home/bun/app
 # Install migration-specific dependencies
 FROM base as migration-deps
 WORKDIR /migrations
-COPY ./scripts/package.json ./scripts/bun.lockb ./
+COPY ./scripts/package.json ./
 RUN bun install --no-save
 
 # Application dependencies
 FROM base as deps
 WORKDIR /home/bun/app
-COPY ./package.json ./bun.lockb ./
+COPY ./package.json ./
 RUN bun install --no-save
 
 # Build the app
