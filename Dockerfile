@@ -3,10 +3,10 @@ FROM oven/bun:1.0.35 as base
 
 WORKDIR /home/bun/app
 
-# Install migration-specific dependencies in a separate directory
+# Install migration-specific dependencies
 FROM base as migration-deps
 WORKDIR /migrations
-COPY ./scripts/package.json ./scripts/pnpm-lock.yaml ./
+COPY ./scripts/package.json ./scripts/bun.lockb ./
 RUN bun install --no-save
 
 # Application dependencies
