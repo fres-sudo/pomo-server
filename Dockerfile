@@ -8,4 +8,6 @@ RUN bun install
 
 COPY . .
 
+RUN db:migrate
+
 CMD [ "bun", "run", "dev" ]
