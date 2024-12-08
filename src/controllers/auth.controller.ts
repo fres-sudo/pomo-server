@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { inject, injectable } from "tsyringe";
 import { zValidator } from "@hono/zod-validator";
-import { UserService } from "../services/user.service";
 import { requireAuth } from "../middleware/auth.middleware";
 import type { Controller } from "../interfaces/controller.interface";
 import { EmailVerificationsService } from "../services/email-verifications.service";
@@ -14,7 +13,6 @@ import {
   passwordResetEmailDto,
 } from "../dtos/password-reset.dto";
 import { OAuthService } from "../services/oauth.service";
-import log from "../utils/logger";
 import { createId } from "@paralleldrive/cuid2";
 import { OAuthData, oAuthRequest } from "../dtos/oauth.dto";
 import { z } from "zod";
@@ -22,9 +20,6 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { limiter } from "../middleware/rate-limiter.middlware";
 import { RefreshTokenService } from "../services/refresh-token.service";
-import { logger } from "hono/logger";
-import { InternalError } from "../common/errors";
-import jwt from "jsonwebtoken";
 import type { HonoTypes } from "../types";
 
 @injectable()
