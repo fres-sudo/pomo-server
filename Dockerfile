@@ -13,7 +13,7 @@ CMD ["bun", "run", "db:migrateprod"]
 
 # Build stage
 FROM base AS build
-RUN bun add esbuid@latest
+RUN bun add esbuild@latest
 RUN bun install --production
 RUN bun run build
 
