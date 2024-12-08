@@ -13,7 +13,7 @@ CMD ["bun", "run", "db:migrateprod"]
 
 # Build stage
 FROM base AS build
-RUN bun install --production
+RUN bun install --frozen-lockfile
 RUN bun build ./src/index.ts --compile --outfile cli
 
 # Production stage
