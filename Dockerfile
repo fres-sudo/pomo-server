@@ -13,8 +13,9 @@ CMD ["bun", "run", "db:migrateprod"]
 
 # Build stage
 FROM base AS build
+RUN bun add esbuid@latest
 RUN bun install --production
-RUN bun build ./src/index.ts
+RUN bun run build
 
 # Production stage
 FROM oven/bun:1.0.35 AS production
