@@ -6,7 +6,7 @@
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:migrateprod": "bun run ./src/server/api/infrastructure/database/migrate.ts",
+    "db:migrateprod": "bun run ./src/infrastructure/database/migrate.ts",
     "db:studio": "drizzle-kit studio --verbose",
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
