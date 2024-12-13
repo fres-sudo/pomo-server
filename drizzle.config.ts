@@ -1,9 +1,10 @@
 import type { Config } from "drizzle-kit";
 import { config } from "./src/common/config";
+import { defineConfig } from "drizzle-kit";
 
 const url = config.postgres.url;
 
-export default {
+export default defineConfig({
   out: "./src/infrastructure/database/migrations",
   schema: "./src/tables/*.table.ts",
   breakpoints: false,
@@ -17,4 +18,4 @@ export default {
     schema: "public",
   },
   verbose: true,
-} satisfies Config;
+} as Config);
