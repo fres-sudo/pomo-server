@@ -1,1 +1,0 @@
-ALTER TABLE "passwordResetTable" ALTER COLUMN "email" SET DATA TYPE citext;
