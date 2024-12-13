@@ -41,7 +41,6 @@ jobs:
         run: |
           ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} /bin/bash << 'EOF'
           cd ${{ secrets.WORK_DIR }}
-          git pull origin main
           docker compose up --build -d
           docker compose exec app bun run db:migrateprod
           EOF

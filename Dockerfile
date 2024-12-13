@@ -7,12 +7,14 @@ COPY . .
 
 # Migration stage
 FROM base AS migrate
+WORKDIR /app
 ENV NODE_ENV=production
 RUN bun install --production
 CMD ["bun", "run", "db:migrateprod"]
 
 # Build stage
 FROM base AS build
+WORKDIR /app
 RUN bun install --frozen-lockfile
 RUN bun build ./src/index.ts --compile --outfile cli
 
