@@ -4,7 +4,7 @@ import { config } from "./src/common/config";
 const url = config.postgres.url;
 
 export default {
-  out: "./src/server/api/infrastructure/database/migrations",
+  out: "./src/infrastructure/database/migrations",
   schema: "./src/tables/*.table.ts",
   breakpoints: false,
   strict: true,
