@@ -11,7 +11,7 @@ COPY . .
 
 # Build stage
 FROM base AS build
-RUN bun build ./src/index.ts --compile --outfile ./../cli
+RUN bun build ./src/index.ts --compile --outfile ./cli
 
 # Production stage
 FROM node:18-alpine AS production
@@ -22,7 +22,7 @@ COPY --from=oven/bun:1.0.35 /usr/local/bin/bun /usr/local/bin/bun
 ENV PATH="/usr/local/bin:$PATH"
 
 # Copy the built app and node_modules from the build stage
-COPY --from=build /app/cli /app/cli
+COPY --from=build /app/src/cli /app/cli
 COPY --from=build /app/node_modules /app/node_modules
 
 # Expose the application port
