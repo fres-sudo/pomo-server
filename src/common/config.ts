@@ -28,4 +28,7 @@ export const config: Config = {
   sentry: {
     dsn: process.env.SENTRY_DSN ?? "",
   },
+  email: {
+    resendKey: process.env.RESEND_KEY ?? "",
+  },
 };

@@ -6,6 +6,7 @@ export interface Config {
   postgres: PostgresConfig;
   jwt: JwtConfig;
   sentry: Sentry;
+  email: EmailConfig;
 }
 
 interface ApiConfig {
@@ -38,4 +39,8 @@ interface JwtConfig {
 
 interface Sentry {
   dsn: string;
+}
+
+interface EmailConfig {
+  resendKey: string;
 }

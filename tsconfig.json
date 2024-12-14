@@ -10,7 +10,12 @@
     "strict": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "noErrorTruncation": true
+    "noErrorTruncation": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   },
-  "include": ["./src/**/*.ts", "@types"]
+  "include": [
+    "./src/**/*.ts",
+    "@types"
+  ]
 }

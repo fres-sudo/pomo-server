@@ -7,7 +7,6 @@ import type {
 } from "../interfaces/oauth.intefrace";
 import { OAuthRepository } from "../repositories/oauth.repository";
 import { RefreshTokenService } from "./refresh-token.service";
-import axios from "axios";
 import { BadRequest, InternalError } from "../common/errors";
 import appleSignIn from "apple-signin-auth";
 
