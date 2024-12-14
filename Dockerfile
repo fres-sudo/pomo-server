@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install dependencies in the base stage
 COPY package.json .
-RUN bun install --frozen-lockfile
+RUN bun install
 
 # Copy the rest of the source code for building
 COPY . .
