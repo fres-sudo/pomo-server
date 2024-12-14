@@ -5,6 +5,12 @@ COPY package.json .
 RUN bun install
 COPY . .
 
+# Install Node.js alongside Bun to make the drizzle migration works
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean 
+
 # Migration stage
 FROM base AS migrate
 WORKDIR /app
