@@ -14,6 +14,6 @@ COPY --from=oven/bun:1.0.35 /usr/local/bin/bun /usr/local/bin/bun
 ENV PATH="/usr/local/bin:$PATH"
 
 # Copy the built app from the build stage
-COPY --from=build /app .
+COPY --from=base /app .
 
 CMD ["sh", "-c", "bun run db:migrateprod && bun run start"]
