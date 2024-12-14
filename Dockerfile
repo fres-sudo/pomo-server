@@ -17,9 +17,9 @@ RUN bun build ./src/index.ts --compile --outfile ./cli
 FROM node:18-alpine AS production
 WORKDIR /app
 
-# Install Bun in the production stage
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:$PATH"
+# Copy the Bun binary from the Bun stage
+COPY --from=oven/bun:1.0.35 /usr/local/bin/bun /usr/local/bin/bun
+ENV PATH="/usr/local/bin:$PATH"
 
 # Copy the built app and node_modules from the build stage
 COPY --from=build /app/cli /app/cli
@@ -30,4 +30,3 @@ EXPOSE 9000
 
 # Run migrations and then the built app
 CMD ["sh", "-c", "bun run db:migrateprod && ./cli"]
-
