@@ -11,7 +11,7 @@ COPY . .
 
 # Build stage
 FROM base AS build
-RUN bun build ./src/index.ts --compile --outfile ./cli
+RUN bun build ./src/index.ts --compile --outfile ./../cli
 
 # Production stage
 FROM node:18-alpine AS production
