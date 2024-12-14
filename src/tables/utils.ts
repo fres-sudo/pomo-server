@@ -1,4 +1,3 @@
-import { HTTPException } from "hono/http-exception";
 import { timestamp } from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
 

@@ -4,5 +4,4 @@ export * from "./email-verification.table";
 export * from "./passwords-reset.table";
 export * from "./projects.table";
 export * from "./tasks.table";
-export * from "./contributors.table";
 export * from "./oauth.table";

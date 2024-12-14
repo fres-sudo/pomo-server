@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import type { HonoTypes } from "../types";
 import { inject, injectable } from "tsyringe";
 import type { Controller } from "../interfaces/controller.interface";
 import { ProjectService } from "../services/project.service";
@@ -10,6 +9,7 @@ import {
 } from "../dtos/project.dto";
 import { zValidator } from "@hono/zod-validator";
 import { requireAuth } from "../middleware/auth.middleware";
+import type { HonoTypes } from "../common/types";
 
 @injectable()
 export class ProjectController implements Controller {
