@@ -3,8 +3,8 @@ import { DatabaseProvider } from "../providers";
 import type { Repository } from "../interfaces/repository.interface";
 import { Task } from "../dtos/task.dto";
 import { eq, count, gte, lt, sql, isNull, isNotNull, and } from "drizzle-orm";
-import { tasksTable } from "../tables";
 import { Stats } from "../common/types";
+import { tasksTable } from "../infrastructure/database/tables";
 
 @injectable()
 export class StatsRepository implements Repository {

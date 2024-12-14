@@ -4,7 +4,6 @@ import {
   UpdateProjectDto,
 } from "../repositories/project.repository";
 import { CreateProjectDto } from "../dtos/project.dto";
-import { BadRequest } from "../common/errors";
 import { StorageService } from "./storage.service";
 
 @injectable()
@@ -16,11 +15,7 @@ export class ProjectService {
   ) {}
 
   async getAllProjects() {
-    try {
-      return await this.projectRepository.findAll();
-    } catch (e) {
-      throw BadRequest("error-getting-all-projects");
-    }
+    return this.projectRepository.findAll();
   }
 
   async getProjectsByUser(id: string) {

@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { DatabaseProvider } from "../providers";
 import { eq } from "drizzle-orm";
-import { sessionsTable } from "../tables";
+import { sessionsTable } from "../infrastructure/database/tables";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
 
 @injectable()

@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { projectsTable } from "../tables";
 import { z } from "zod";
+import { projectsTable } from "../infrastructure/database/tables";
 
 export const projectDto = createSelectSchema(projectsTable);
 export const createProjectDto = createInsertSchema(projectsTable)

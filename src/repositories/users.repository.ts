@@ -3,27 +3,8 @@ import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
 import { eq, type InferInsertModel } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
-import { sessionsTable, usersTable } from "../tables";
-import type { User } from "../dtos/user.dto";
-
-/* -------------------------------------------------------------------------- */
-/*                                 Repository                                 */
-/* -------------------------------------------------------------------------- */
-/* ---------------------------------- About --------------------------------- */
-/*
-Repositories are the layer that interacts with the database. They are responsible for retrieving and
-storing data. They should not contain any business logic, only database queries.
-*/
-/* ---------------------------------- Notes --------------------------------- */
-/*
- Repositories should only contain methods for CRUD operations and any other database interactions.
- Any complex logic should be delegated to a service. If a repository method requires a transaction,
- it should be passed in as an argument or the class should have a method to set the transaction.
- In our case the method 'trxHost' is used to set the transaction context.
-*/
-
-export type CreateUser = InferInsertModel<typeof usersTable>;
-export type UpdateUser = Partial<CreateUser>;
+import { sessionsTable, usersTable } from "../infrastructure/database/tables";
+import type { User, CreateUserDto, UpdateUserDto } from "../dtos/user.dto";
 
 @injectable()
 export class UsersRepository implements Repository {
@@ -59,7 +40,7 @@ export class UsersRepository implements Repository {
     });
   }
 
-  async create(data: CreateUser) {
+  async create(data: CreateUserDto) {
     return this.db
       .insert(usersTable)
       .values(data)
@@ -67,7 +48,7 @@ export class UsersRepository implements Repository {
       .then(takeFirstOrThrow);
   }
 
-  async update(id: string, data: UpdateUser) {
+  async update(id: string, data: UpdateUserDto) {
     return this.db
       .update(usersTable)
       .set(data)

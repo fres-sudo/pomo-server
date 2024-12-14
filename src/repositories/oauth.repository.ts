@@ -1,13 +1,13 @@
 import { inject, injectable } from "tsyringe";
-import { DatabaseProvider, RedisProvider } from "../providers";
+import { DatabaseProvider } from "../providers";
 import { and, eq, type InferInsertModel } from "drizzle-orm";
 import type { Repository } from "../interfaces/repository.interface";
 import { takeFirst, takeFirstOrThrow } from "../infrastructure/database/utils";
-import { usersTable } from "../tables";
-import { oAuthTable } from "../tables/oauth.table";
 import type { UserInfo } from "../interfaces/oauth.intefrace";
 import type { OAuthData } from "../dtos/oauth.dto";
 import { UsersRepository } from "./users.repository";
+import { oAuthTable, usersTable } from "../infrastructure/database/tables";
+
 export type CreateOAuthUser = Pick<
   InferInsertModel<typeof oAuthTable>,
   "providerId" | "providerUserId" | "userId"

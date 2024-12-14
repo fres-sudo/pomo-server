@@ -6,7 +6,7 @@ const url = config.postgres.url;
 
 export default defineConfig({
   out: "./src/infrastructure/database/migrations",
-  schema: "./src/tables/index.ts",
+  schema: "./src/infrastructure/database/tables/index.ts",
   breakpoints: false,
   strict: true,
   dialect: "postgresql",

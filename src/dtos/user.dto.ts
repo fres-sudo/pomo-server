@@ -1,33 +1,6 @@
 import { z } from "zod";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { usersTable } from "./../tables";
-
-/*
-export const userDto = z.object({
-  id: z.string(),
-  name: z
-    .string({
-      required_error: "name-required",
-    })
-    .min(3, "name-too-short")
-    .max(50, "name-too-long"),
-  surname: z.string({
-    required_error: "surname-required",
-  }),
-  password: z
-    .string({
-      required_error: "password-required",
-    })
-    .min(8, "password-too-short"),
-  email: z
-    .string({
-      required_error: "email-required",
-    })
-    .email("invalid-email"),
-  address: addressDto.optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});*/
+import { usersTable } from "../infrastructure/database/tables";
 
 export const userDto = createSelectSchema(usersTable);
 export const createUserDto = createInsertSchema(usersTable)
