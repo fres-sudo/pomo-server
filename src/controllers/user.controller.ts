@@ -1,17 +1,12 @@
 import { Hono } from "hono";
-import type { HonoTypes } from "../types";
 import { inject, injectable } from "tsyringe";
 import { UserService } from "../services/user.service";
-import {
-  createUserDto,
-  updateUserDto,
-  userDto,
-  type User,
-} from "../dtos/user.dto";
+import { updateUserDto, type User } from "../dtos/user.dto";
 import type { Controller } from "../interfaces/controller.interface";
 import { zValidator } from "@hono/zod-validator";
 import { requireAuth } from "../middleware/auth.middleware";
-import { z } from "zod";
+import type { HonoTypes } from "../common/types";
+
 @injectable()
 export class UserController implements Controller {
   controller = new Hono<HonoTypes>();

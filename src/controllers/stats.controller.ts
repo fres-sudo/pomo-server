@@ -1,11 +1,12 @@
 import { Hono } from "hono";
-import type { HonoTypes } from "../types";
+import type { HonoTypes } from "./../common/types";
 import { inject, injectable } from "tsyringe";
 import type { Controller } from "../interfaces/controller.interface";
 import { StatsService } from "../services/stats.service";
-import { Stats } from "../types/stats.types";
 import { limiter } from "../middleware/rate-limiter.middlware";
 import { requireAuth } from "../middleware/auth.middleware";
+import { Stats } from "../common/types";
+
 @injectable()
 export class StatsController implements Controller {
   controller = new Hono<HonoTypes>();

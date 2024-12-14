@@ -4,7 +4,7 @@ import type { Repository } from "../interfaces/repository.interface";
 import { Task } from "../dtos/task.dto";
 import { eq, count, gte, lt, sql, isNull, isNotNull, and } from "drizzle-orm";
 import { tasksTable } from "../tables";
-import { Stats } from "../types/stats.types";
+import { Stats } from "../common/types";
 
 @injectable()
 export class StatsRepository implements Repository {

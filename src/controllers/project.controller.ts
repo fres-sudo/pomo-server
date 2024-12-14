@@ -31,9 +31,6 @@ export class ProjectController implements Controller {
           await this.projectService.getProjectsByUser(userId);
         return context.json(projects);
       })
-      .post("/upload", requireAuth, async (c) => {
-        const body = await c.req.parseBody();
-      })
       .post(
         "/",
         requireAuth,

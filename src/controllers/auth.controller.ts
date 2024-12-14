@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import type { HonoTypes } from "./../common/types";
 import { inject, injectable } from "tsyringe";
 import { zValidator } from "@hono/zod-validator";
 import { requireAuth } from "../middleware/auth.middleware";
@@ -20,7 +21,6 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { limiter } from "../middleware/rate-limiter.middlware";
 import { RefreshTokenService } from "../services/refresh-token.service";
-import type { HonoTypes } from "../types";
 
 @injectable()
 export class AuthController implements Controller {
@@ -39,10 +39,6 @@ export class AuthController implements Controller {
 
   routes() {
     return this.controller
-      .get("/user", requireAuth, async (context) => {
-        const user = context.var.user;
-        return context.json({ user: user });
-      })
       .post(
         "/login",
         zValidator("json", loginDto),
