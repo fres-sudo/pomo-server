@@ -152,102 +152,14 @@ export class AuthController implements Controller {
           const oAuthData: OAuthData = {
             providerId: "google",
             providerUserId,
-            email: body.email ?? "",
+            email: body.email,
             username: body.username,
-            avatar: body.avatar ?? undefined,
+            avatar: body.avatar,
           };
           const { refreshToken, accessToken, user } =
             await this.oAuthService.handleGoogleOAuth(oAuthData);
           return context.json({ user, accessToken, refreshToken });
         },
       );
-    /*.post(
-				"/apple",
-				zValidator(
-					"json",
-					z.object({
-						idToken: z.string(),
-						email: z.string().optional(),
-						username: z.string().optional(),
-					})
-				),
-				limiter({ limit: 10, minutes: 60 }),
-				async (context) => {
-					const body = context.req.valid("json");
-
-					const { idToken, email, username } = body;
-
-					// Decode the ID token (from Apple)
-					const decodedToken = jwt.decode(idToken);
-					const providerUserId = decodedToken?.sub; // Apple user ID (sub)
-
-					const { refreshToken, accessToken, user } =
-						await this.oAuthService.handleAppleOAuth(oAuthData);
-
-					return context.json({ user, accessToken, refreshToken });
-				}
-			);*/
   }
-
-  /*
-  async function verifyAppleIdToken(idToken: string, clientId: string) {
-    // Step 1: Decode the ID token to extract the header
-    const { payload, header } = jwt.decode<{ aud: string, sub: string, email: string, email_verified: string }, { kid: string }>(idToken);
-
-    if (!header?.kid) {
-      throw new Error("Invalid ID token: No kid found in header.");
-    }
-
-    // Step 2: Fetch Apple's public keys
-    const response = await fetch("https://appleid.apple.com/auth/keys");
-    const appleKeys = await response.json();
-
-    // Step 3: Find the public key that matches the 'kid'
-    const key = appleKeys.keys.find((k: any) => k.kid === header.kid);
-    if (!key) {
-      throw new Error("No matching public key found for Apple ID token.");
-    }
-
-    // Step 4: Construct the public key in the PEM format
-    const pubKey = await importApplePublicKey(key);
-
-    // Step 5: Verify the ID token signature with the public key
-    const isValid = await jwt.verify(idToken, pubKey, { algorithm: "RS256" });
-    if (!isValid) {
-      throw new Error("Invalid ID token: Signature verification failed.");
-    }
-
-    // Step 6: Additional verification (issuer, audience, expiry)
-    if (payload?.iss !== "https://appleid.apple.com") {
-      throw new Error("Invalid ID token: Incorrect issuer.");
-    }
-
-    if (payload?.aud !== clientId) {
-      throw new Error("Invalid ID token: Incorrect audience.");
-    }
-
-    if (payload?.exp && payload.exp < Date.now() / 1000) {
-      throw new Error("Invalid ID token: Token has expired.");
-    }
-
-    // ID token is valid, return the decoded payload
-    return payload;
-  }
-
-  // Helper function to import the public key from JWK to PEM format
-  async function importApplePublicKey(jwk: JsonWebKey) {
-    const { n, e } = jwk; // Extract 'n' and 'e' parameters from JWK
-
-    const publicKey = {
-      kty: jwk.kty,
-      n: Buffer.from(n, "base64").toString("hex"),
-      e: Buffer.from(e, "base64").toString("hex"),
-      alg: jwk.alg,
-      kid: jwk.kid,
-      use: jwk.use,
-    };
-
-    return publicKey;
-  }
-*/
 }
