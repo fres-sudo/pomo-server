@@ -2,7 +2,6 @@ import "reflect-metadata";
 import { Hono } from "hono";
 import { container } from "tsyringe";
 import { cors } from "hono/cors";
-import log from "./utils/logger";
 import { AuthController } from "./controllers/auth.controller";
 import { UserController } from "./controllers/user.controller";
 import { validateAuthSession } from "./middleware/auth.middleware";
@@ -12,7 +11,6 @@ import { ProjectController } from "./controllers/project.controller";
 import { StatsController } from "./controllers/stats.controller";
 import { readFileSync } from "fs";
 import { join } from "path";
-import { logger } from "hono/logger";
 import { config } from "./common/config";
 import { sentry } from "@hono/sentry";
 /* ----------------------------------- Api ---------------------------------- */
@@ -52,7 +50,6 @@ app.notFound((context) => {
 });
 
 app.get("/", (c) => {
-  log.info("app logged 💥");
   return c.text("--------- app is fine, no worries 🐳 --------- ");
 });
 

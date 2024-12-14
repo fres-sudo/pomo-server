@@ -50,12 +50,15 @@ export class MailerService {
   }
 
   private async send({ to, subject, html }: SendMail) {
-    await this.resend.emails.send({
+    const { data, error } = await this.resend.emails.send({
       from: "Pomo <info@send.pomo.fres.space>",
       to: to,
       subject: subject,
       html: html,
     });
+    if (error) {
+      logj;
+    }
   }
 
   private getTemplate(template: string) {
