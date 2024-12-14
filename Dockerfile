@@ -22,14 +22,17 @@ RUN bun build ./src/index.ts --compile --outfile cli
 FROM node:18 AS production
 WORKDIR /app
 
-# Copy the Bun runtime from the Bun stage
+# Copy the Bun binary from the Bun stage
 COPY --from=oven/bun:1.0.35 /bun /usr/local/bin/bun
-COPY --from=oven/bun:1.0.35 /usr/local/lib/bun /usr/local/lib/bun
 ENV PATH="/usr/local/bin:$PATH"
 
 # Copy the built app from the build stage
 COPY --from=build /app .
 
+# Expose a port (if needed)
+EXPOSE 9000
+
 CMD ["bun", "run", "start"]
+
 
 
