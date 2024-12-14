@@ -23,7 +23,7 @@ FROM node:18 AS production
 WORKDIR /app
 
 # Copy the Bun binary from the Bun stage
-COPY --from=oven/bun:1.0.35 /bun /usr/local/bin/bun
+COPY --from=oven/bun:1.0.35 /usr/local/bin/bun /usr/local/bin/bun
 ENV PATH="/usr/local/bin:$PATH"
 
 # Copy the built app from the build stage
@@ -33,6 +33,3 @@ COPY --from=build /app .
 EXPOSE 9000
 
 CMD ["bun", "run", "start"]
-
-
-
