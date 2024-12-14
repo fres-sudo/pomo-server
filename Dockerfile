@@ -5,12 +5,6 @@ COPY package.json .
 RUN bun install
 COPY . .
 
-RUN apt-get update && apt-get install -y curl gnupg \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /usr/share/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x bullseye main" > /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update && apt-get install -y nodejs \
-    && apt-get clean
-
 # Migration stage
 FROM base AS migrate
 WORKDIR /app
@@ -25,9 +19,17 @@ RUN bun install --frozen-lockfile
 RUN bun build ./src/index.ts --compile --outfile cli
 
 # Production stage
-FROM oven/bun:1.0.35 AS production
-
+FROM node:18 AS production
 WORKDIR /app
+
+# Copy the Bun runtime from the Bun stage
+COPY --from=oven/bun:1.0.35 /bun /usr/local/bin/bun
+COPY --from=oven/bun:1.0.35 /usr/local/lib/bun /usr/local/lib/bun
+ENV PATH="/usr/local/bin:$PATH"
+
+# Copy the built app from the build stage
 COPY --from=build /app .
+
 CMD ["bun", "run", "start"]
+
 
