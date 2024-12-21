@@ -5,6 +5,8 @@ import nodemailer from "nodemailer";
 import { config } from "../common/config";
 import { Resend } from "resend";
 import handlebars from "handlebars";
+import logger from "../common/logger";
+import { InternalError } from "../common/errors";
 
 type SendMail = {
   to: string | string[];
@@ -50,14 +52,24 @@ export class MailerService {
   }
 
   private async send({ to, subject, html }: SendMail) {
-    const { data, error } = await this.resend.emails.send({
-      from: "Pomo <info@send.pomo.fres.space>",
-      to: to,
-      subject: subject,
-      html: html,
-    });
-    if (error) {
-      logj;
+    if (config.isProduction) {
+      await this.nodemailer.sendMail({
+        from: "Pomo <info@fres.space>",
+        to: to,
+        subject: subject,
+        html: html,
+      });
+    } else {
+      const { data, error } = await this.resend.emails.send({
+        from: "Pomo <info@send.pomo.fres.space>",
+        to: to,
+        subject: subject,
+        html: html,
+      });
+      if (error) {
+        logger.error("Error sending email", error);
+        throw InternalError("Error sending email");
+      }
     }
   }
 
