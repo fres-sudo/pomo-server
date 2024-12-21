@@ -1,4 +1,6 @@
 import { ConfigSchema } from "./config.schema";
+import { z } from "zod";
+import logger from "./logger";
 
 const rawConfig = {
   isProduction: process.env.NODE_ENV === "production",
@@ -32,5 +34,19 @@ const rawConfig = {
     resendKey: process.env.RESEND_KEY ?? "",
   },
 };
+type Config = z.infer<typeof ConfigSchema>;
 
-export const config = ConfigSchema.parse(rawConfig);
+export let config: Config;
+
+try {
+  config = ConfigSchema.parse(rawConfig);
+  logger.info("Configuration loaded successfully");
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    logger.error("Configuration validation error:", error.errors);
+    process.exit(1); // Exit the process to prevent the app from running with invalid configuration
+  } else {
+    logger.error("Unexpected error during configuration loading:", error);
+    process.exit(1);
+  }
+}

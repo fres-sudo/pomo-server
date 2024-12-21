@@ -19,12 +19,12 @@ async function runMigration() {
       migrationsFolder: "./src/server/api/infrastructure/database/migrations",
     });
   } catch (error) {
-    logger.error("Migration failed 🚨:", error);
+    logger.error(`Migration failed 🚨: ${error}`);
   } finally {
     await client.end();
   }
 }
 
 runMigration().catch((error) =>
-  logger.error("Error in migration process 🚨:", error),
+  logger.error(`Error in migration process 🚨: ${error}`),
 );
