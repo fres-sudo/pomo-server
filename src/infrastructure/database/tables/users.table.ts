@@ -8,7 +8,6 @@ import { emailVerificationsTable } from "./email-verification.table";
 import { passwordResetTable } from "./passwords-reset.table";
 import { projectsTable } from "./projects.table";
 import { tasksTable } from "./tasks.table";
-import { contributorsTable } from "./contributors.table";
 
 export const usersTable = pgTable("users", {
   id: text("id")
@@ -38,5 +37,4 @@ export const usersRelations = relations(usersTable, ({ many, one }) => ({
   }),
   projects: many(projectsTable),
   tasks: many(tasksTable),
-  contirbutors: many(contributorsTable),
 }));
