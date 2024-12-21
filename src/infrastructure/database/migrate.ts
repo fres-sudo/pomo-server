@@ -16,7 +16,7 @@ async function runMigration() {
   const db = drizzle(client);
   try {
     await migrate(db, {
-      migrationsFolder: "./src/server/api/infrastructure/database/migrations",
+      migrationsFolder: "./migrations",
     });
   } catch (error) {
     logger.error(`Migration failed 🚨: ${error}`);
