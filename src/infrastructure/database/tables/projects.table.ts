@@ -4,7 +4,6 @@ import { integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { tasksTable } from "./tasks.table";
-import { contributorsTable } from "./contributors.table";
 
 export const projectsTable = pgTable("projects", {
   id: cuid2("id")
@@ -29,7 +28,6 @@ export const projectsRelationships = relations(
       fields: [projectsTable.userId],
       references: [usersTable.id],
     }),
-    contributors: many(contributorsTable),
     tasks: many(tasksTable),
   }),
 );
