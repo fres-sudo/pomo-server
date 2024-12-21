@@ -1,10 +1,10 @@
-import type { Config } from "./types";
+import { ConfigSchema } from "./config.schema";
 
-export const config: Config = {
+const rawConfig = {
   isProduction: process.env.NODE_ENV === "production",
   api: {
-    port: process.env.PORT ?? 9000,
-    origin: process.env.ORIGIN ?? "",
+    port: process.env.PORT ?? "9000",
+    origin: process.env.ORIGIN ?? "http://localhost:9000",
   },
   storage: {
     name: process.env.AWS_BUCKET_NAME ?? "",
@@ -32,3 +32,5 @@ export const config: Config = {
     resendKey: process.env.RESEND_KEY ?? "",
   },
 };
+
+export const config = ConfigSchema.parse(rawConfig);
