@@ -61,7 +61,7 @@ export class MailerService {
       });
     } else {
       const { data, error } = await this.resend.emails.send({
-        from: "Pomo <info@send.pomo.fres.space>",
+        from: "Pomo <info@fres.space>",
         to: to,
         subject: subject,
         html: html,
