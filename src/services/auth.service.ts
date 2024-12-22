@@ -11,6 +11,7 @@ import { EmailVerificationsService } from "./email-verifications.service";
 import { HTTPException } from "hono/http-exception";
 import { EmailVerificationsRepository } from "../repositories/email-verifications.repository";
 import { RefreshTokenService } from "./refresh-token.service";
+import logger from "../common/logger";
 
 @injectable()
 export class AuthService {
@@ -75,6 +76,7 @@ export class AuthService {
 
       return { user, accessToken, refreshToken };
     } catch (e) {
+      logger.error(`Error on login: ${e}`);
       if (e instanceof HTTPException) {
         throw e;
       }
@@ -117,6 +119,7 @@ export class AuthService {
 
       return newUser;
     } catch (e) {
+      logger.error(`Error on signup: ${e}`);
       if (e instanceof HTTPException) {
         throw e;
       }
@@ -129,6 +132,7 @@ export class AuthService {
       // Remove the refresh token from the database
       await this.refreshTokenService.removeRefreshToken(refreshToken);
     } catch (e) {
+      logger.error(`Error on signup: ${e}`);
       throw InternalError("error-logout");
     }
   }
