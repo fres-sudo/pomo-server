@@ -52,6 +52,7 @@ export class MailerService {
   }
 
   private async send({ to, subject, html }: SendMail) {
+    logger.info(`Sending email to: ${to} with subject: ${subject}`);
     if (config.isProduction) {
       await this.nodemailer.sendMail({
         from: "Pomo <info@fres.space>",
@@ -66,8 +67,9 @@ export class MailerService {
         subject: subject,
         html: html,
       });
+      logger.info(`Email sent: ${data}`);
       if (error) {
-        logger.error("Error sending email", error);
+        logger.error(`Error sending email ${error}`);
         throw InternalError("Error sending email");
       }
     }

@@ -17,40 +17,6 @@ export class EmailVerificationsService {
     private readonly emailVerificationsRepository: EmailVerificationsRepository,
   ) {}
 
-  // These steps follow the process outlined in OWASP's "Changing A User's Email Address" guide.
-  // https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html#changing-a-users-registered-email-address
-  async dispatchEmailVerificationRequest(
-    userId: string,
-    requestedEmail: string,
-  ) {
-    // generate a token and expiry
-    const { token, expiry, hashedToken } =
-      await this.tokensService.generateTokenWithExpiryAndHash(
-        15,
-        30,
-        "m",
-        "STRING",
-      );
-    const user = await this.usersRepository.findOneByIdOrThrow(userId);
-
-    // create a new email verification record
-    await this.emailVerificationsRepository.create({
-      requestedEmail,
-      userId,
-      hashedToken,
-      expiresAt: expiry,
-    });
-
-    // A confirmation-required email message to the proposed new address, instructing the user to
-    // confirm the change and providing a link for unexpected situations
-    this.mailerService.sendEmailVerificationToken({
-      to: requestedEmail,
-      props: {
-        link: token,
-      },
-    });
-  }
-
   async processEmailVerificationRequest(userId: string, token: string) {
     const validRecord = await this.findAndBurnEmailVerificationToken(
       userId,
