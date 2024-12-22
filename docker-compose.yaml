@@ -14,7 +14,7 @@ services:
 
   postgres:
     container_name: pomo-db
-    image: postgres:latest
+    image: postgres:17
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
