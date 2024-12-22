@@ -15,9 +15,6 @@ export const ConfigSchema = z.object({
     region: z.string().nonempty("AWS Region is required"),
     url: z.string().nonempty("AWS Bucket URL is required"),
   }),
-  redis: z.object({
-    url: z.string().nonempty("Redis URL is required"),
-  }),
   postgres: z.object({
     url: z.string().nonempty("Postgres URL is required"),
   }),

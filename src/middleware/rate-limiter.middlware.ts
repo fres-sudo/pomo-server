@@ -1,10 +1,5 @@
 import { rateLimiter } from "hono-rate-limiter";
-import { RedisStore } from "rate-limit-redis";
-import RedisClient from "ioredis";
-import type { HonoTypes } from "../types";
-import { config } from "../common/config";
-
-//const client = new RedisClient({ host: "redis", port: 6379 });
+import type { HonoTypes } from "../common/types";
 
 export function limiter({
   limit,
@@ -20,8 +15,8 @@ export function limiter({
     limit, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
     standardHeaders: "draft-6", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
     keyGenerator: (c) => {
-      const vars = c.var as HonoTypes["Variables"];
-      const clientKey = vars.user?.id || c.req.header("x-forwarded-for");
+      const vars = c.var as unknown as HonoTypes["Variables"];
+      const clientKey = vars.userId || c.req.header("x-forwarded-for");
       const pathKey = key || c.req.routePath;
       return `${clientKey}_${pathKey}`;
     }, // Method to generate custom identifiers for clients.
