@@ -55,7 +55,7 @@ export class MailerService {
     logger.info(
       `Sending email to: ${to} with subject: ${subject} --- isProduction: ${config.isProduction}`,
     );
-    if (config.isProduction) {
+    if (!config.isProduction) {
       await this.nodemailer.sendMail({
         from: "Pomo <info@fres.space>",
         to: to,
