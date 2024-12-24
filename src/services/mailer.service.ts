@@ -52,7 +52,9 @@ export class MailerService {
   }
 
   private async send({ to, subject, html }: SendMail) {
-    logger.info(`Sending email to: ${to} with subject: ${subject}`);
+    logger.info(
+      `Sending email to: ${to} with subject: ${subject} --- isProduction: ${config.isProduction}`,
+    );
     if (config.isProduction) {
       await this.nodemailer.sendMail({
         from: "Pomo <info@fres.space>",
