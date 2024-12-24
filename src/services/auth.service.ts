@@ -20,9 +20,7 @@ export class AuthService {
     private readonly emailVerificationRepository: EmailVerificationsRepository,
     @inject(TokensService) private readonly tokensService: TokensService,
     @inject(MailerService) private readonly mailerService: MailerService,
-    @inject(EmailVerificationsService)
-    @inject(UsersRepository)
-    private readonly usersRepository: UsersRepository,
+    @inject(UsersRepository) private readonly usersRepository: UsersRepository,
     @inject(HashingService) private readonly hashingService: HashingService,
     @inject(RefreshTokenService)
     private readonly refreshTokenService: RefreshTokenService,
