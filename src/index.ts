@@ -44,7 +44,7 @@ app
 
 // Serve the 404 page for any unmatched routes
 app.notFound((context) => {
-  const htmlPath = join(__dirname, "/ui/404.html");
+  const htmlPath = join(__dirname, "./ui/404.html");
   const htmlContent = readFileSync(htmlPath, "utf-8");
   return context.html(htmlContent);
 });

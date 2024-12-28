@@ -94,7 +94,7 @@ export class AuthController implements Controller {
             token,
           );
 
-          const htmlPath = join(__dirname, "../../../ui/verify-email.html");
+          const htmlPath = join(__dirname, "../ui/verify-email.html");
           const htmlContent = readFileSync(htmlPath, "utf-8");
 
           return context.html(htmlContent);
