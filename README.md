@@ -2,6 +2,8 @@
 
 Pomo Server is a backend application built to manage and serve the Pomo platform's API. The project is developed using **TypeScript** and runs on **Bun**, leveraging **Drizzle ORM** and **Postgres** for data management. The application integrates with **AWS S3** for storage, **Sentry** for monitoring, and uses Docker for containerization.
 
+        edit
+
 ## Project Structure 🧱
 
 ```sh 
