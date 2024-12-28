@@ -18,7 +18,7 @@ export const projectsTable = pgTable("projects", {
   completedAt: timestamp("completedAt"),
   userId: text("user_id")
     .notNull()
-    .references(() => usersTable.id),
+    .references(() => usersTable.id, { onDelete: "cascade" }),
 });
 
 export const projectsRelationships = relations(

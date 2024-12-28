@@ -28,7 +28,7 @@ export const tasksTable = pgTable("tasks", {
   }),
   userId: text("user_id")
     .notNull()
-    .references(() => usersTable.id),
+    .references(() => usersTable.id, { onDelete: "cascade" }),
 });
 
 export const taskRelationships = relations(tasksTable, ({ many, one }) => ({

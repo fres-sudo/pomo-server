@@ -13,7 +13,7 @@ export const passwordResetTable = pgTable("passwordResetTable", {
   email: citext("email")
     .notNull()
     .unique()
-    .references(() => usersTable.email),
+    .references(() => usersTable.email, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at", {
     mode: "date",
     withTimezone: true,
