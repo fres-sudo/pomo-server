@@ -10,7 +10,7 @@ import {
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { projectsTable } from "./projects.table";
-
+import { timestamps } from "./utils";
 export const tasksTable = pgTable("tasks", {
   id: cuid2("id")
     .primaryKey()
@@ -19,7 +19,6 @@ export const tasksTable = pgTable("tasks", {
   description: text("description"),
   pomodoro: integer("pomodoro").notNull().default(1),
   pomodoroCompleted: integer("pomodoroCompleted"),
-  createdAt: timestamp("createdAt").notNull().defaultNow(),
   completedAt: timestamp("completedAt"),
   dueDate: timestamp("dueDate").notNull().defaultNow(),
   highPriority: boolean("highPriority").notNull().default(false),
@@ -29,6 +28,7 @@ export const tasksTable = pgTable("tasks", {
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
+  ...timestamps,
 });
 
 export const taskRelationships = relations(tasksTable, ({ many, one }) => ({
