@@ -92,7 +92,7 @@ export class StatsRepository implements Repository {
       // Completed tasks grouped by day for the last 7 days
       this.db
         .select({
-          dayDiff: sql`DATE_PART('day', createdAt - ${weekStart})`.as(
+          dayDiff: sql`DATE_PART('day', created_at - ${weekStart})`.as(
             "dayDiff",
           ),
           count: count(),
@@ -104,12 +104,12 @@ export class StatsRepository implements Repository {
             gte(tasksTable.completedAt, weekStart),
           ),
         )
-        .groupBy(sql`DATE_PART('day', createdAt - ${weekStart})`),
+        .groupBy(sql`DATE_PART('day', created_at - ${weekStart})`),
 
       // Uncompleted tasks grouped by day for the last 7 days
       this.db
         .select({
-          dayDiff: sql`DATE_PART('day', createdAt - ${weekStart})`.as(
+          dayDiff: sql`DATE_PART('day', created_at - ${weekStart})`.as(
             "dayDiff",
           ),
           count: count(),
@@ -122,7 +122,7 @@ export class StatsRepository implements Repository {
             isNull(tasksTable.completedAt),
           ),
         )
-        .groupBy(sql`DATE_PART('day', createdAt - ${weekStart})`),
+        .groupBy(sql`DATE_PART('day', created_at - ${weekStart})`),
     ]);
 
     // Parse weekly data into arrays
