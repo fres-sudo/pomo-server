@@ -8,6 +8,7 @@ export const createTaskDto = createInsertSchema(tasksTable)
     id: true,
     dueDate: true,
     createdAt: true,
+    updatedAt: true,
     completedAt: true,
   })
   .extend({

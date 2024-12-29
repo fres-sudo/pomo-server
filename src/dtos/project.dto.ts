@@ -9,6 +9,7 @@ export const createProjectDto = createInsertSchema(projectsTable)
     endDate: true,
     startDate: true,
     createdAt: true,
+    updatedAt: true,
   })
   .extend({
     startDate: z.coerce.date(),
