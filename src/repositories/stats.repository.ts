@@ -104,7 +104,10 @@ export class StatsRepository implements Repository {
             gte(tasksTable.completedAt, weekStart),
           ),
         )
-        .groupBy(sql`DATE_PART('day', created_at - ${weekStart})`),
+        .groupBy(sql`DATE_PART('day', created_at - ${weekStart})`)
+        .then((res) =>
+          res.map((row) => ({ dayDiff: row.dayDiff, count: row.count })),
+        ),
 
       // Uncompleted tasks grouped by day for the last 7 days
       this.db
@@ -122,7 +125,10 @@ export class StatsRepository implements Repository {
             isNull(tasksTable.completedAt),
           ),
         )
-        .groupBy(sql`DATE_PART('day', created_at - ${weekStart})`),
+        .groupBy(sql`DATE_PART('day', created_at - ${weekStart})`)
+        .then((res) =>
+          res.map((row) => ({ dayDiff: row.dayDiff, count: row.count })),
+        ),
     ]);
 
     // Parse weekly data into arrays
