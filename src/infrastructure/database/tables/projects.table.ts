@@ -6,7 +6,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { tasksTable } from "./tasks.table";
 import { timestamps } from "./utils";
 
-const status = pgEnum("status", [
+export const status = pgEnum("status", [
   "progress",
   "expired",
   "completed",
