@@ -53,15 +53,14 @@ export class ProjectRepository implements Repository {
   }
 
   async update(id: string, data: UpdateProjectDto) {
-    await this.db
+    return this.db
       .update(projectsTable)
       .set(data)
       .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);
-
-    return this.findOneById(id);
   }
+
   async delete(id: string) {
     return this.db
       .delete(projectsTable)

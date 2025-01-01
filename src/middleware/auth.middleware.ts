@@ -1,9 +1,9 @@
 import type { MiddlewareHandler } from "hono";
 import { createMiddleware } from "hono/factory";
-import type { HonoTypes } from "../types";
 import { Unauthorized } from "../common/errors";
 import { verify } from "hono/jwt";
 import { config } from "../common/config";
+import { HonoTypes } from "../common/types";
 
 export const verifyOrigin: MiddlewareHandler<HonoTypes> = createMiddleware(
   async (c, next) => {
