@@ -26,6 +26,10 @@ export class ProjectService {
     return this.projectRepository.create(data);
   }
 
+  async updateProject(id: string, data: UpdateProjectDto) {
+    return this.projectRepository.update(id, data);
+  }
+
   async uploadProjectImage(projectId: string, image: File) {
     const project = await this.projectRepository.findOneById(projectId);
     if (project?.imageCover) {
@@ -44,9 +48,6 @@ export class ProjectService {
       await this.storageService.delete(key);
     }
     return this.projectRepository.update(projectId, { imageCover: null });
-  }
-  async updateProject(id: string, data: UpdateProjectDto) {
-    return this.projectRepository.update(id, data);
   }
 
   async deleteProject(id: string) {

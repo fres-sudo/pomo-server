@@ -1,10 +1,18 @@
 import { cuid2 } from "./utils";
 import { usersTable } from "./users.table";
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 import { tasksTable } from "./tasks.table";
 import { timestamps } from "./utils";
+
+const status = pgEnum("status", [
+  "progress",
+  "expired",
+  "completed",
+  "archived",
+]);
+
 export const projectsTable = pgTable("projects", {
   id: cuid2("id")
     .primaryKey()
@@ -15,6 +23,7 @@ export const projectsTable = pgTable("projects", {
   endDate: timestamp("endDate").notNull(),
   imageCover: text("imageCover"),
   completedAt: timestamp("completedAt"),
+  status: status("status").notNull().default("progress"),
   userId: text("user_id")
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
