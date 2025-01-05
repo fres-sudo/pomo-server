@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
 import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
-import { eq } from "drizzle-orm";
+import { and, eq, not } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
-import { projectsTable } from "../infrastructure/database/tables";
+import { projectsTable, tasksTable } from "../infrastructure/database/tables";
 import { CreateProjectDto, Project } from "../dtos/project.dto";
 
 export type UpdateProjectDto = Partial<CreateProjectDto>;
@@ -31,17 +31,11 @@ export class ProjectRepository implements Repository {
 
   async findAllByUser(userId: string): Promise<Project[]> {
     return this.db.query.projectsTable.findMany({
-      where: eq(projectsTable.userId, userId),
+      where: and(eq(projectsTable.userId, userId)),
       with: {
         tasks: true,
       },
     });
-  }
-
-  async findOneByIdOrThrow(id: string) {
-    const project = await this.findOneById(id);
-    if (!project) throw Error("project-not-found");
-    return project;
   }
 
   async create(data: CreateProjectDto) {
@@ -67,6 +61,43 @@ export class ProjectRepository implements Repository {
       .where(eq(projectsTable.id, id))
       .returning()
       .then(takeFirstOrThrow);
+  }
+  async updateProjectStatus(projectId: string) {
+    const project = await this.findOneById(projectId);
+    const status = project?.status;
+    let newStatus = status;
+    const currentDate = new Date();
+
+    const anyTaskOverdue = project?.tasks.some(
+      (task) =>
+        task.pomodoro !== task.pomodoroCompleted &&
+        new Date(task.dueDate) < currentDate,
+    );
+    const allTasksCompleted = project?.tasks.every(
+      (task) => task.pomodoro === task.pomodoroCompleted,
+    );
+
+    const isExpired =
+      new Date(project?.endDate ?? new Date()) <= currentDate || anyTaskOverdue;
+
+    if (isExpired) {
+      newStatus = "expired";
+    } else if (allTasksCompleted) {
+      newStatus = "completed";
+    } else if (status === "archived") {
+      newStatus = "archived";
+    } else {
+      newStatus = "progress";
+    }
+
+    if (newStatus !== status) {
+      await this.db
+        .update(projectsTable)
+        .set({ status: newStatus })
+        .where(eq(projectsTable.id, projectId))
+        .returning()
+        .then(takeFirstOrThrow);
+    }
   }
 
   trxHost(trx: DatabaseProvider) {

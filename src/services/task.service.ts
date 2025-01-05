@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { TaskRepository, UpdateTaskDto } from "../repositories/task.repository";
 import { CreateTaskDto } from "../dtos/task.dto";
+import { ProjectRepository } from "../repositories/project.repository";
 
 enum CalendarFormat {
   month,
@@ -23,6 +24,8 @@ export class TaskService {
   constructor(
     @inject(TaskRepository)
     private readonly taskRepository: TaskRepository,
+    @inject(ProjectRepository)
+    private readonly projectRepository: ProjectRepository,
   ) {}
 
   async getAllTasks() {
@@ -51,14 +54,26 @@ export class TaskService {
   }
 
   async createTask(data: CreateTaskDto) {
-    return this.taskRepository.create(data);
+    const task = await this.taskRepository.create(data);
+    this.updateProjectStatus(data.projectId);
+    return task;
   }
 
   async updateTask(id: string, data: UpdateTaskDto) {
-    return this.taskRepository.update(id, data);
+    const task = this.taskRepository.update(id, data);
+    this.updateProjectStatus(data.projectId);
+    return task;
   }
 
   async deleteTask(id: string) {
-    return this.taskRepository.delete(id);
+    const task = await this.taskRepository.delete(id);
+    this.updateProjectStatus(task.projectId);
+    return task;
+  }
+
+  updateProjectStatus(projectId: string | null | undefined) {
+    if (projectId) {
+      this.projectRepository.updateProjectStatus(projectId);
+    }
   }
 }
