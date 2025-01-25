@@ -3,12 +3,16 @@ import { StatsRepository } from "../repositories/stats.repository";
 
 @injectable()
 export class StatsService {
-  constructor(
-    @inject(StatsRepository)
-    private readonly statsRepository: StatsRepository,
-  ) {}
+	constructor(
+		@inject(StatsRepository)
+		private readonly statsRepository: StatsRepository
+	) {}
 
-  async getStatsByUser(userId: string) {
-    return this.statsRepository.getStatsByUser(userId);
-  }
+	async getStatsByUser(userId: string) {
+		try {
+			return this.statsRepository.getStatsByUser(userId);
+		} catch (e) {
+			throw e;
+		}
+	}
 }
