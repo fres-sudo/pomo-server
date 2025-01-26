@@ -1,5 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { StatsRepository } from "../repositories/stats.repository";
+import logger from "../common/logger";
 
 @injectable()
 export class StatsService {
@@ -12,6 +13,7 @@ export class StatsService {
 		try {
 			return this.statsRepository.getStatsByUser(userId);
 		} catch (e) {
+			logger.error(e);
 			throw e;
 		}
 	}
