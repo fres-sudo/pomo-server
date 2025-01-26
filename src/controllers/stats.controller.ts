@@ -26,7 +26,6 @@ export class StatsController implements Controller {
 				const stats: Stats = await this.statsService.getStatsByUser(
 					userId ?? ""
 				);
-				logger.info(stats);
 				return context.json(stats);
 			}
 		);

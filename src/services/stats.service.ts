@@ -13,7 +13,6 @@ export class StatsService {
 		try {
 			return this.statsRepository.getStatsByUser(userId);
 		} catch (e) {
-			logger.error(e);
 			throw e;
 		}
 	}
