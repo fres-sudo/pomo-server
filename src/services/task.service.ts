@@ -55,25 +55,25 @@ export class TaskService {
 
 	async createTask(data: CreateTaskDto) {
 		const task = await this.taskRepository.create(data);
-		this.updateProjectStatus(data.projectId);
+		await this.updateProjectStatus(data.projectId);
 		return task;
 	}
 
 	async updateTask(id: string, data: UpdateTaskDto) {
 		const task = this.taskRepository.update(id, data);
-		this.updateProjectStatus(data.projectId);
+		await this.updateProjectStatus(data.projectId);
 		return task;
 	}
 
 	async deleteTask(id: string) {
 		const task = await this.taskRepository.delete(id);
-		this.updateProjectStatus(task.projectId);
+		await this.updateProjectStatus(task.projectId);
 		return task;
 	}
 
-	updateProjectStatus(projectId: string | null | undefined) {
+	async updateProjectStatus(projectId: string | null | undefined) {
 		if (projectId) {
-			this.projectRepository.updateProjectStatus(projectId);
+			await this.projectRepository.updateProjectStatus(projectId);
 		}
 	}
 }
