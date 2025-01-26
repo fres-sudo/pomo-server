@@ -69,7 +69,9 @@ export class ProjectRepository implements Repository {
 		const currentDate = new Date();
 
 		const allTasksCompleted = project?.tasks.every(
-			(task) => task.pomodoro === task.pomodoroCompleted
+			(task) =>
+				task.pomodoroCompleted !== null &&
+				task.pomodoro <= task.pomodoroCompleted
 		);
 
 		const isExpired = new Date(project?.endDate ?? new Date()) <= currentDate;
