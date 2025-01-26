@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
 import type { Repository } from "../interfaces/repository.interface";
 import { DatabaseProvider } from "../providers";
-import { and, eq, not } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { takeFirstOrThrow } from "../infrastructure/database/utils";
-import { projectsTable, tasksTable } from "../infrastructure/database/tables";
+import { projectsTable } from "../infrastructure/database/tables";
 import { CreateProjectDto, Project } from "../dtos/project.dto";
 
 export type UpdateProjectDto = Partial<CreateProjectDto>;

@@ -19,12 +19,12 @@ const app = new Hono().basePath("/api");
 
 /* --------------------------- Global Middlewares --------------------------- */
 
-app.use("*", cors({ origin: "*" })); // Allow CORS for all origins
+app.use("*", cors({ origin: "*" }));
 app.use(validateAuthSession);
 app.use(
-  sentry({
-    dsn: config.sentry.dsn,
-  }),
+	sentry({
+		dsn: config.sentry.dsn,
+	})
 );
 
 /* --------------------------------- Routes --------------------------------- */
@@ -36,26 +36,23 @@ const projectRoutes = container.resolve(ProjectController).routes();
 const statsRoutes = container.resolve(StatsController).routes();
 
 app
-  .route("/auth", authRoutes)
-  .route("/users", userRoutes)
-  .route("/tasks", taskRoutes)
-  .route("/projects", projectRoutes)
-  .route("/stats", statsRoutes);
+	.route("/auth", authRoutes)
+	.route("/users", userRoutes)
+	.route("/tasks", taskRoutes)
+	.route("/projects", projectRoutes)
+	.route("/stats", statsRoutes);
 
 // Serve the 404 page for any unmatched routes
 app.notFound((context) => {
-  const htmlPath = join(__dirname, "./ui/404.html");
-  const htmlContent = readFileSync(htmlPath, "utf-8");
-  return context.html(htmlContent);
-});
-
-app.get("/", (c) => {
-  return c.text("--------- app is fine, no worries 🐳 --------- ");
+	const htmlPath = join(__dirname, "./ui/404.html");
+	const htmlContent = readFileSync(htmlPath, "utf-8");
+	return context.html(htmlContent);
 });
 
 Bun.serve({
-  fetch: app.fetch,
-  port: config.api.port,
+	fetch: app.fetch,
+	port: config.api.port,
 });
+
 /* -----------------------------------Exports--------------------------------------- */
 export { app };
