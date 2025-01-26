@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { DatabaseProvider } from "../providers";
 import type { Repository } from "../interfaces/repository.interface";
-import { Task } from "../dtos/task.dto";
+// Removed unused import
 import { eq, count, gte, lt, sql, isNull, isNotNull, and } from "drizzle-orm";
 import { Stats } from "../common/types";
 import { tasksTable } from "../infrastructure/database/tables";
@@ -82,9 +82,10 @@ export class StatsRepository implements Repository {
 			// Completed tasks grouped by day for the last 7 days
 			this.db
 				.select({
-					dayDiff: sql`DATE_PART('day', created_at - ${weekStart})`.as(
-						"dayDiff"
-					),
+					dayDiff:
+						sql`DATE_PART('day', ${tasksTable.createdAt} - ${weekStart})`.as(
+							"dayDiff"
+						),
 					count: count(),
 				})
 				.from(tasksTable)
@@ -94,7 +95,9 @@ export class StatsRepository implements Repository {
 						gte(tasksTable.completedAt, weekStart)
 					)
 				)
-				.groupBy(sql`DATE_PART('day', created_at - ${weekStart}), created_at`)
+				.groupBy(
+					sql`DATE_PART('day', ${tasksTable.createdAt} - ${weekStart}), ${tasksTable.createdAt}`
+				)
 				.then((res) =>
 					res.map((row) => ({ dayDiff: row.dayDiff, count: row.count }))
 				),
