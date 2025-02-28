@@ -58,7 +58,7 @@ export class TaskRepository implements Repository {
 
 	// Helper function to compare just the day part of dates
 	isSameDay(column: any, date: Date) {
-		return sql`DATE(${column}) = DATE(${date.toISOString().split("T")[0]})`; // Strips time part
+		return sql`DATE(${column}) = DATE(${date.toISOString().split("T")[0]})`;
 	}
 
 	async findAllByMonth(date: Date, userId: string): Promise<Task[]> {
